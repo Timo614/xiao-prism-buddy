@@ -1,6 +1,8 @@
 # Prerequisites
 *.d
 
+build
+
 .vscode
 .pio
 
@@ -33,3 +35,5 @@
 *.exe
 *.out
 *.app
+components
+sdkconfig
