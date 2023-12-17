@@ -1,82 +1,56 @@
-// Animates white pixels to simulate flying through a star field
-
+#include <lvgl.h>
 #include <SPI.h>
 #include <TFT_eSPI.h>
 
-// Use hardware SPI
 TFT_eSPI tft = TFT_eSPI();
 
-// With 1024 stars the update rate is ~65 frames per second
-#define NSTARS 1024
-uint8_t sx[NSTARS] = {};
-uint8_t sy[NSTARS] = {};
-uint8_t sz[NSTARS] = {};
+static const uint16_t screenWidth  = 320;
+static const uint16_t screenHeight = 240;
 
-uint8_t za, zb, zc, zx;
+static lv_disp_draw_buf_t draw_buf;
+static lv_color_t buf[ screenWidth * screenHeight / 10 ];
 
-// Fast 0-255 random number generator from http://eternityforest.com/Projects/rng.php:
-uint8_t __attribute__((always_inline)) rng()
+void flush_cb( lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *color_p )
 {
-  zx++;
-  za = (za^zc^zx);
-  zb = (zb+za);
-  zc = ((zc+(zb>>1))^za);
-  return zc;
+    uint32_t w = ( area->x2 - area->x1 + 1 );
+    uint32_t h = ( area->y2 - area->y1 + 1 );
+
+    tft.startWrite();
+    tft.setAddrWindow( area->x1, area->y1, w, h );
+    tft.pushColors( ( uint16_t * )&color_p->full, w * h, true );
+    tft.endWrite();
+
+    lv_disp_flush_ready( disp );
 }
 
-void setup() {
-  za = random(256);
-  zb = random(256);
-  zc = random(256);
-  zx = random(256);
+void setup()
+{
+    Serial.begin( 115200 );
 
-  tft.init();
-  tft.setRotation(3);
-  tft.fillScreen(TFT_BLACK);
+    String test_string = "Test";
 
-  // fastSetup() must be used immediately before fastPixel() to prepare screen
-  // It must be called after any other graphics drawing function call if fastPixel()
-  // is to be called again
-  //tft.fastSetup(); // Prepare plot window range for fast pixel plotting
+    lv_init();
+    tft.begin(); 
+    tft.setRotation( 3 ); 
+
+    lv_disp_draw_buf_init( &draw_buf, buf, NULL, screenWidth * screenHeight / 10 );
+
+    static lv_disp_drv_t disp_drv;
+    lv_disp_drv_init( &disp_drv );
+    
+    disp_drv.hor_res = screenWidth;
+    disp_drv.ver_res = screenHeight;
+    disp_drv.flush_cb = flush_cb;
+    disp_drv.draw_buf = &draw_buf;
+    lv_disp_drv_register( &disp_drv );
+    
+    lv_obj_t *label = lv_label_create( lv_scr_act() );
+    lv_label_set_text( label, test_string.c_str() );
+    lv_obj_align( label, LV_ALIGN_CENTER, 0, 0 );
 }
 
 void loop()
 {
-  unsigned long t0 = micros();
-  uint8_t spawnDepthVariation = 255;
-
-  for(int i = 0; i < NSTARS; ++i)
-  {
-    if (sz[i] <= 1)
-    {
-      sx[i] = 160 - 120 + rng();
-      sy[i] = rng();
-      sz[i] = spawnDepthVariation--;
-    }
-    else
-    {
-      int old_screen_x = ((int)sx[i] - 160) * 256 / sz[i] + 160;
-      int old_screen_y = ((int)sy[i] - 120) * 256 / sz[i] + 120;
-
-      // This is a faster pixel drawing function for occasions where many single pixels must be drawn
-      tft.drawPixel(old_screen_x, old_screen_y,TFT_BLACK);
-
-      sz[i] -= 2;
-      if (sz[i] > 1)
-      {
-        int screen_x = ((int)sx[i] - 160) * 256 / sz[i] + 160;
-        int screen_y = ((int)sy[i] - 120) * 256 / sz[i] + 120;
-  
-        if (screen_x >= 0 && screen_y >= 0 && screen_x < 320 && screen_y < 240)
-        {
-          uint8_t r, g, b;
-          r = g = b = 255 - sz[i];
-          tft.drawPixel(screen_x, screen_y, tft.color565(r,g,b));
-        }
-        else
-          sz[i] = 0; // Out of screen, die.
-      }
-    }
-  }
+    lv_timer_handler();
+    delay( 5 );
 }
-
