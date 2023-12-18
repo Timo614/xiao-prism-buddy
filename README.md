@@ -13,13 +13,13 @@ This project is built on the ESP32 IoT Development Framework (IDF) and utilizes 
 </div>
 
 <p align="center">
-  <a href="https://raw.githubusercontent.com/Timo614/xiao-prism-buddy/main/LICENSE">
+  <a href="https://raw.githubusercontent.com/timo614/xiao-prism-buddy/main/LICENSE">
     <img src="https://img.shields.io/github/license/timo614/xiao-prism-buddy" alt="license">
   </a>
-  <a href="https://github.com/Timo614/xiao-prism-buddy/releases">
-    <img src="https://img.shields.io/github/v/release/Timo614/xiao-prism-buddy?include_prereleases&color=blueviolet" alt="release">
+  <a href="https://github.com/timo614/xiao-prism-buddy/releases">
+    <img src="https://img.shields.io/github/v/release/timo614/xiao-prism-buddy?include_prereleases&color=blueviolet" alt="release">
   </a>
-    <img src="https://img.shields.io/github/repo-size/Timo614/xiao-prism-buddy" alt="repo-size">
+    <img src="https://img.shields.io/github/repo-size/timo614/xiao-prism-buddy" alt="repo-size">
 </p>
 
 This project demonstrates the use of a splitter prism to create a three-dimensional display. Configuration is provided for connecting with a local home assistant install for fetching weather data for display on the device via animations. 
