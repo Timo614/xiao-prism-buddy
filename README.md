@@ -35,13 +35,13 @@ This project demonstrates the use of a splitter prism to create a three-dimensio
 ### Dependencies
 
 The following library versions were used for this example:
-- esp-idf: v5.0.5
+- esp-idf: v5.0.4
 - LovyanGFX: v1.1.9
 - LVGL: v8.3.11
 
 #### Preparing your environment
 
-1. Install esp-idf 5.0.5
+1. Install esp-idf 5.0.4
 4. Export your environment for esp-idf
 5. Build, flash, and (optionally) monitor the deployment
 
