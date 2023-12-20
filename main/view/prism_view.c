@@ -1,4 +1,4 @@
-#include "prism_view.hpp"
+#include "prism_view.h"
 
 static const char *TAG = "view";
 

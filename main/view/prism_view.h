@@ -1,5 +1,5 @@
-#ifndef INDICATOR_VIEW_H
-#define INDICATOR_VIEW_H
+#ifndef VIEW_H
+#define VIEW_H
 
 #include "lvgl.h"
 

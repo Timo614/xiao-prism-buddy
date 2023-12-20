@@ -5,8 +5,9 @@
 #include "esp_event_base.h"
 
 #include "lv_port.hpp"
-#include "prism_model.hpp"
-#include "prism_view.hpp"
+#include "prism_model.h"
+#include "prism_view.h"
+#include "prism_storage.h"
 
 static const char *TAG = "app_main";
 
