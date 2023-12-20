@@ -35,5 +35,5 @@ build
 *.exe
 *.out
 *.app
-components
+
 sdkconfig
