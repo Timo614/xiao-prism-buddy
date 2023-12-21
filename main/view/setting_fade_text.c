@@ -25,7 +25,7 @@ void screen_setting_fade_text_init(void) {
     lv_obj_set_width( screen_setting_fade_text_title, LV_SIZE_CONTENT);  /// 1
     lv_obj_set_height( screen_setting_fade_text_title, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_align( screen_setting_fade_text_title, LV_ALIGN_LEFT_MID );
-    lv_label_set_text(screen_setting_fade_text_title,"Always-on");
+    lv_label_set_text(screen_setting_fade_text_title,"Fade Away Text");
 
     screen_setting_fade_text_cfg = lv_switch_create(screen_setting_fade_text);
     lv_obj_set_width( screen_setting_fade_text_cfg, 50);

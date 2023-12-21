@@ -11,6 +11,7 @@ extern lv_obj_t *screen_browser;
 extern lv_obj_t *screen_browser_wifi;
 extern lv_obj_t *screen_browser_image;
 extern lv_obj_t *screen_browser_text;
+extern lv_obj_t *screen_browser_page;
 
 void screen_browser_init(void);
 
