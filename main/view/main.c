@@ -29,9 +29,14 @@ void screen_main_init(void)
     lv_obj_set_x( screen_main_wifi, -20 );
     lv_obj_set_y( screen_main_wifi, 20 );
     lv_obj_set_align( screen_main_wifi, LV_ALIGN_TOP_RIGHT );
-    lv_obj_add_flag( screen_main_wifi, LV_OBJ_FLAG_ADV_HITTEST );   /// Flags
-    lv_obj_clear_flag( screen_main_wifi, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
-    lv_obj_add_flag( screen_main_wifi, LV_OBJ_FLAG_CLICKABLE );    /// Flags
+
+    screen_main_weather = lv_img_create(screen_main);
+    lv_img_set_src(screen_main_weather, &ui_weather_clear_day);
+    lv_obj_set_width( screen_main_weather, LV_SIZE_CONTENT);  /// 1
+    lv_obj_set_height( screen_main_weather, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_x( screen_main_weather, 0 );
+    lv_obj_set_y( screen_main_weather, 0 );
+    lv_obj_set_align( screen_main_weather, LV_ALIGN_CENTER );
 
     screen_main_hour = lv_obj_create(screen_main);
     lv_obj_set_width( screen_main_hour, 200);

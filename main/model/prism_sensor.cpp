@@ -24,40 +24,24 @@ static void gesture_sensor_poll_task(void *arg)
             case 0:
                 switch (__g_sensor_state.cursor.type) {
                 case 1:
-                case 2:
-                case 3:
                     if (__g_sensor_state.cursor.select)
-                        ESP_LOGI(TAG, "%s", cursor_str[__g_sensor_state.cursor.type]);
+                        ESP_LOGI(TAG, "Tap");
                     break;
                 default:
                     break;
                 }
                 break;
-            case 1:
-            case 2:
-            case 3:
-            case 4:
-            case 5:
-                ESP_LOGI(TAG, "%d%s", __g_sensor_state.type, "-finger");
-                break;
             case 6:
-                ESP_LOGI(TAG, "%s%d", "Rotate Right", __g_sensor_state.rotate);
+                ESP_LOGI(TAG, "Rotate Right %d", __g_sensor_state.rotate);
                 break;
             case 7:
-                ESP_LOGI(TAG, "%s%d", "Rotate Left", __g_sensor_state.rotate);
+                ESP_LOGI(TAG, "Rotate Left %d", __g_sensor_state.rotate);
                 break;
             case 8:
                 ESP_LOGI(TAG, "Swipe Left");
                 break;
             case 9:
                 ESP_LOGI(TAG, "Swipe Right");
-                break;
-            case 19:
-            case 20:
-            case 21:
-            case 22:
-            case 23:
-                ESP_LOGI(TAG, "%d%s", (__g_sensor_state.type - 19 + 1), "-finger push");
                 break;
             default:
                 gesture_found = false;

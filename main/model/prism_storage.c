@@ -1,7 +1,7 @@
 #include "prism_storage.h"
 #include "nvs_flash.h"
 
-#define STORAGE_NAMESPACE "indicator"
+#define STORAGE_NAMESPACE "prism"
 
 int prism_storage_init(void)
 {
