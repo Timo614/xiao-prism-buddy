@@ -15,44 +15,47 @@ const char *cursor_str[] = {
 
 static void gesture_sensor_poll_task(void *arg)
 {
-    for( ;; )
-    {
-        bool gesture_found = true;
+    gesture_event_t gesture_event;
+
+    for(;;) {
+        gesture_event.type = GESTURE_NONE;
+        gesture_event.data = 0;
+
         xSemaphoreTake(__g_data_mutex, portMAX_DELAY);
         if (sensor.getResult(__g_sensor_state)) {
             switch (__g_sensor_state.type) {
             case 0:
-                switch (__g_sensor_state.cursor.type) {
-                case 1:
-                    if (__g_sensor_state.cursor.select)
-                        ESP_LOGI(TAG, "Tap");
-                    break;
-                default:
-                    break;
+                if (__g_sensor_state.cursor.type == 1 && __g_sensor_state.cursor.select) {
+                    ESP_LOGI(TAG, "Tap");
+                    gesture_event.type = GESTURE_TAP;
                 }
                 break;
             case 6:
                 ESP_LOGI(TAG, "Rotate Right %d", __g_sensor_state.rotate);
+                gesture_event.type = GESTURE_ROTATE_RIGHT;
+                gesture_event.data = __g_sensor_state.rotate;
                 break;
             case 7:
                 ESP_LOGI(TAG, "Rotate Left %d", __g_sensor_state.rotate);
+                gesture_event.type = GESTURE_ROTATE_LEFT;
+                gesture_event.data = __g_sensor_state.rotate;
                 break;
             case 8:
                 ESP_LOGI(TAG, "Swipe Left");
+                gesture_event.type = GESTURE_SWIPE_LEFT;
                 break;
             case 9:
                 ESP_LOGI(TAG, "Swipe Right");
+                gesture_event.type = GESTURE_SWIPE_RIGHT;
                 break;
             default:
-                gesture_found = false;
                 break;
             }
-        }       
-
+        }
         xSemaphoreGive(__g_data_mutex);
         
-        if (gesture_found) {
-            esp_event_post_to(view_event_handle, VIEW_EVENT_BASE, VIEW_EVENT_SENSOR_DATA, NULL, 0, portMAX_DELAY);
+        if (gesture_event.type != GESTURE_NONE) {
+            esp_event_post_to(view_event_handle, VIEW_EVENT_BASE, VIEW_EVENT_SENSOR_DATA, &gesture_event, sizeof(gesture_event_t), portMAX_DELAY);
         }
 
         vTaskDelay(pdMS_TO_TICKS(100));

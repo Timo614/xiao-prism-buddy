@@ -103,10 +103,6 @@ static void __fade_text_timer_callback(void* arg)
     ESP_LOGI(TAG, "sleep mode, lcd bl off");
     __lcd_bl_off();
     __timer_st_set(false);
-
-    bool st=0;
-    st = 0;
-    esp_event_post_to(view_event_handle, VIEW_EVENT_BASE, VIEW_EVENT_SCREEN_CTRL, &st, sizeof(st), portMAX_DELAY);
 }
 
 static void __timer_stop(void)
@@ -239,9 +235,6 @@ int prism_display_init(void)
                                                             VIEW_EVENT_BASE, VIEW_EVENT_BRIGHTNESS_UPDATE, 
                                                             __view_event_handler, NULL, NULL));
 
-    ESP_ERROR_CHECK(esp_event_handler_instance_register_with(view_event_handle, 
-                                                            VIEW_EVENT_BASE, VIEW_EVENT_DISPLAY_CFG_APPLY, 
-                                                            __view_event_handler, NULL, NULL));
     init_done_flag = true;
     return 0;
 }

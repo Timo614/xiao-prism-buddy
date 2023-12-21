@@ -3,9 +3,21 @@
 
 #include "lvgl.h"
 
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+extern lv_obj_t *current_screen;
+
 LV_IMG_DECLARE( ui_img_wifi_disconnect_png);   // assets/wifi_disconnect.png
 LV_IMG_DECLARE( ui_img_high_light_png);   // assets/high_light.png
 LV_IMG_DECLARE( ui_img_low_light_png);   // assets/low_light.png
+
+LV_IMG_DECLARE( ui_img_wifi_1_png);
+LV_IMG_DECLARE( ui_img_wifi_2_png);
+LV_IMG_DECLARE( ui_img_wifi_3_png);
+LV_IMG_DECLARE( ui_img_lock_png);
 
 void up_Animation( lv_obj_t *TargetObject, int delay);
 
@@ -105,5 +117,10 @@ void _ui_anim_callback_free_user_data(lv_anim_t *a);
 void _ui_anim_callback_set_image_frame(lv_anim_t* a, int32_t v);
 int32_t _ui_anim_callback_get_image_frame(lv_anim_t* a);
 void _ui_spinbox_step( lv_obj_t *target, int val, int anm);
+
+
+#ifdef __cplusplus
+} /*extern "C"*/
+#endif
 
 #endif

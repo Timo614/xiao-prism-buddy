@@ -34,6 +34,20 @@ struct view_data_time_cfg
     time_t  time;     
 }__attribute__((packed));
 
+typedef enum {
+    GESTURE_NONE = 0,
+    GESTURE_TAP,
+    GESTURE_ROTATE_RIGHT,
+    GESTURE_ROTATE_LEFT,
+    GESTURE_SWIPE_LEFT,
+    GESTURE_SWIPE_RIGHT
+} gesture_type_t;
+
+struct gesture_event_t {
+    gesture_type_t type;
+    int data;
+};
+
 enum {
     VIEW_EVENT_SCREEN_START = 0,  // uint8_t, enum start_screen, which screen when start
     VIEW_EVENT_TIME,  //  bool time_format_24    
@@ -49,10 +63,7 @@ enum {
     VIEW_EVENT_BRIGHTNESS_UPDATE,   // uint8_t brightness
     VIEW_EVENT_DISPLAY_CFG_APPLY,   // struct view_data_display. will save
 
-
     VIEW_EVENT_SHUTDOWN,      //NULL
-    VIEW_EVENT_FACTORY_RESET, //NULL
-    VIEW_EVENT_SCREEN_CTRL,   // bool  0:disable , 1:enable
 
     VIEW_EVENT_ALL,
 };

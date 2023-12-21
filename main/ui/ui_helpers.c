@@ -1,5 +1,7 @@
 #include "ui_helpers.h"
 
+lv_obj_t *current_screen;
+
 ///////////////////// ANIMATIONS ////////////////////
 void up_Animation( lv_obj_t *TargetObject, int delay)
 {
@@ -130,6 +132,7 @@ void _ui_screen_delete( lv_obj_t ** target )
 
 void _ui_screen_change( lv_obj_t *target, lv_scr_load_anim_t fademode, int spd, int delay) 
 {
+   current_screen = target;
    lv_scr_load_anim(target, fademode, spd, delay, false);
 }
 

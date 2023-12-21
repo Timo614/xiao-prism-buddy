@@ -8,8 +8,6 @@
 extern "C" {
 #endif
 
-extern lv_obj_t *screen_last;
-
 void prism_view_init(void);
 
 #ifdef __cplusplus

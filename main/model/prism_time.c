@@ -62,13 +62,6 @@ static void __time_sync_notification_cb(struct timeval *tv)
     esp_event_post_to(view_event_handle, VIEW_EVENT_BASE, VIEW_EVENT_TIME, &time_format_24, sizeof(time_format_24), portMAX_DELAY);
 }
 
-static void __time_set(time_t time)
-{
-    struct tm tm = {4, 14, 3, 19, 0, 138, 0, 0, 0};
-    struct timeval timestamp = { time, 0 };
-    settimeofday(&timestamp, NULL);
-}
-
 static void __time_sync_enable(void)
 {
     sntp_init();
