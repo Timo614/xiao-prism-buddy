@@ -30,7 +30,6 @@ void screen_setting_brightness_init(void) {
     lv_obj_set_y( screen_setting_brightness_title, 50 );
     lv_obj_set_align( screen_setting_brightness_title, LV_ALIGN_TOP_MID );
     lv_label_set_text(screen_setting_brightness_title,"Brightness");
-    lv_obj_set_style_text_font(screen_setting_brightness_title, &ui_font_font1, LV_PART_MAIN| LV_STATE_DEFAULT);
 
     screen_setting_brightness_slider = lv_slider_create(screen_setting_brightness);
     lv_obj_set_width( screen_setting_brightness_slider, 250);

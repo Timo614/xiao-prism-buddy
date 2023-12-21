@@ -6,6 +6,7 @@
 
 #include "lv_port.h"
 #include "prism_model.h"
+#include "prism_controller.h"
 #include "prism_view.h"
 #include "prism_storage.h"
 
@@ -49,7 +50,7 @@ extern "C" void app_main(void)
     lv_port_sem_give();
 
     prism_model_init();
-    // prism_controller_init();
+    prism_controller_init();
 
     while (1) {
 

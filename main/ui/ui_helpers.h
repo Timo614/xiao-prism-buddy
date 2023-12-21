@@ -4,17 +4,8 @@
 #include "lvgl.h"
 
 LV_IMG_DECLARE( ui_img_wifi_disconnect_png);   // assets/wifi_disconnect.png
-LV_IMG_DECLARE( ui_img_location_png);   // assets/location.png
-LV_IMG_DECLARE( ui_img_temp_png);   // assets/temp.png
-LV_IMG_DECLARE( ui_img_humidity_png);   // assets/humidity.png
 LV_IMG_DECLARE( ui_img_high_light_png);   // assets/high_light.png
 LV_IMG_DECLARE( ui_img_low_light_png);   // assets/low_light.png
-
-LV_FONT_DECLARE( ui_font_font0);
-LV_FONT_DECLARE( ui_font_font1);
-LV_FONT_DECLARE( ui_font_font2);
-LV_FONT_DECLARE( ui_font_font3);
-LV_FONT_DECLARE( ui_font_font4);
 
 void up_Animation( lv_obj_t *TargetObject, int delay);
 

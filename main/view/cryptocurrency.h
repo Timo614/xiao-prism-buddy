@@ -7,6 +7,11 @@ extern "C" {
 
 #include "lvgl/lvgl.h"
 
+LV_IMG_DECLARE( ui_coins_btc );
+LV_IMG_DECLARE( ui_coins_doge );
+LV_IMG_DECLARE( ui_coins_eth );
+LV_IMG_DECLARE( ui_coins_xrp );
+
 extern lv_obj_t *screen_cryptocurrency;
 extern lv_obj_t *screen_cryptocurrency_wifi;
 extern lv_obj_t *screen_cryptocurrency_image;

@@ -7,6 +7,11 @@ extern "C" {
 
 #include "lvgl/lvgl.h"
 
+LV_IMG_DECLARE( ui_gifs_confetti );
+LV_IMG_DECLARE( ui_gifs_fire );
+LV_IMG_DECLARE( ui_gifs_hologram );
+LV_IMG_DECLARE( ui_gifs_watermelon );
+
 extern lv_obj_t *screen_browser;
 extern lv_obj_t *screen_browser_wifi;
 extern lv_obj_t *screen_browser_image;
