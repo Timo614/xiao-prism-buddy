@@ -2,12 +2,15 @@
 #define VIEW_H
 
 #include "lvgl.h"
+#include "lv_port.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int prism_view_init(void);
+extern lv_obj_t *screen_last;
+
+void prism_view_init(void);
 
 #ifdef __cplusplus
 }

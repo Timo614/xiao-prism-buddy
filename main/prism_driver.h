@@ -2,7 +2,7 @@
 #define PRISM_DRIVER_H
 
 #include <LovyanGFX.hpp>
-#include "panel_st7789_mirror_x.hpp"
+#include "panel_st7789_mirror_x.h"
 #define TFT_WIDTH   240
 #define TFT_HEIGHT  320
 

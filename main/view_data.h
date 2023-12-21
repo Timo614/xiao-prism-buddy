@@ -25,22 +25,13 @@ struct view_data_wifi_connet_ret_msg
 struct view_data_display
 {
     int   brightness; //0~100
-    bool  sleep_mode_en;       //Turn off word elements
-    int   sleep_mode_time_min;  
-    int   sleep_mode_awake_fade_in_secs;
+    bool  fade_text_enabled;       //Turn off word elements
 };
 
 struct view_data_time_cfg
 {
     bool    time_format_24;
-    bool    auto_update; //time auto update
-    time_t  time;       // use when auto_update is true
-    bool    set_time; 
-
-    bool    auto_update_zone;  // use when  auto_update  is true
-    int8_t  zone;       // use when auto_update_zone is true
-    
-    bool    daylight;   // use when auto_update is true  
+    time_t  time;     
 }__attribute__((packed));
 
 enum {

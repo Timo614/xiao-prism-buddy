@@ -6,8 +6,7 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/semphr.h"
-#include "lv_port.hpp"
-#include "prism_driver.hpp"
+#include "lv_port.h"
 
 #define LGFX_USE_V1
 #include <lvgl.h>
@@ -16,7 +15,7 @@
 #define LV_PORT_TICK_PERIOD_MS          (2)
 #define BUFF_SIZE 40
 
-static LGFX lcd;
+LGFX lcd;
 
 static const uint16_t screenWidth  = 320;
 static const uint16_t screenHeight = 240;

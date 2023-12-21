@@ -1,5 +1,5 @@
-#ifndef TIME_H
-#define TIME_H
+#ifndef PRISM_CONTROLLER_H
+#define PRISM_CONTROLLER_H
 
 #include "config.h"
 #include "view_data.h"
@@ -8,12 +8,7 @@
 extern "C" {
 #endif
 
-
-//ntp sync
-int prism_time_init(void);
-
-// set TZ
-int time_net_zone_set( char *p);
+int prism_controller_init(void);
 
 #ifdef __cplusplus
 }

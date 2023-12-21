@@ -4,7 +4,7 @@
 #include "esp_event.h"
 #include "esp_event_base.h"
 
-#include "lv_port.hpp"
+#include "lv_port.h"
 #include "prism_model.h"
 #include "prism_view.h"
 #include "prism_storage.h"
@@ -42,11 +42,13 @@ extern "C" void app_main(void)
 
     ESP_ERROR_CHECK(esp_event_loop_create(&view_event_task_args, &view_event_handle));
 
+    prism_storage_init();
+
     lv_port_sem_take();
     prism_view_init();
     lv_port_sem_give();
 
-    // prism_model_init();
+    prism_model_init();
     // prism_controller_init();
 
     while (1) {

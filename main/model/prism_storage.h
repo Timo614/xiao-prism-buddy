@@ -10,13 +10,13 @@ extern "C" {
 #endif
 
 
-int storage_init(void);
+int prism_storage_init(void);
 
-esp_err_t storage_write(char *p_key, void *p_data, size_t len);
+esp_err_t prism_storage_write(char *p_key, void *p_data, size_t len);
 
 
 //p_len : inout
-esp_err_t storage_read(char *p_key, void *p_data, size_t *p_len);
+esp_err_t prism_storage_read(char *p_key, void *p_data, size_t *p_len);
 
 #ifdef __cplusplus
 }

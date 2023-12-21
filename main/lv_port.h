@@ -1,5 +1,8 @@
 #pragma once
 
+#include "prism_driver.h"
+extern LGFX lcd;
+
 /**
  * @brief Initialize related work for lvgl.
  *

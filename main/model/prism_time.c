@@ -38,7 +38,7 @@ static void __time_cfg_get(struct view_data_time_cfg *p_cfg )
 static void __time_cfg_save(struct view_data_time_cfg *p_cfg )
 {
     esp_err_t ret = 0;
-    ret = storage_write(TIME_CFG_STORAGE, (void *)p_cfg, sizeof(struct view_data_time_cfg));
+    ret = prism_storage_write(TIME_CFG_STORAGE, (void *)p_cfg, sizeof(struct view_data_time_cfg));
     if( ret != ESP_OK ) {
         ESP_LOGI(TAG, "cfg write err:%d", ret);
     } else {
@@ -48,8 +48,8 @@ static void __time_cfg_save(struct view_data_time_cfg *p_cfg )
 
 static void __time_cfg_print(struct view_data_time_cfg *p_cfg )
 {
-    printf( "time_format_24:%d, auto_update:%d, time:%ld, auto_update_zone:%d, zone:%d, daylight:%d\n",  \
-      (bool) p_cfg->time_format_24, (bool)p_cfg->auto_update, (long)p_cfg->time, (bool)p_cfg->auto_update_zone, (int8_t)p_cfg->zone, (bool)p_cfg->daylight);
+    printf( "time_format_24:%d, time:%ld,",  \
+      (bool) p_cfg->time_format_24,(long)p_cfg->time);
 }
 
 
@@ -81,45 +81,20 @@ static void __time_sync_stop(void)
 
 static void __time_zone_set(struct view_data_time_cfg *p_cfg)
 {
-    if ( !p_cfg->auto_update_zone) {
-        
-        int8_t zone = p_cfg->zone;
-        char zone_str[32];
+    char net_zone[64] = {0};
+    xSemaphoreTake(__g_data_mutex, portMAX_DELAY);
+    memcpy(net_zone, &__g_time_model.net_zone, sizeof(net_zone));
+    xSemaphoreGive(__g_data_mutex);
 
-        if( p_cfg->daylight) {
-            zone -=1; //todo
-        }
-        if( zone >= 0) {
-            snprintf(zone_str, sizeof(zone_str) - 1, "UTC-%d", zone);
-        } else {
-            snprintf(zone_str, sizeof(zone_str) - 1, "UTC+%d", 0 - zone);
-        }
-        setenv("TZ", zone_str, 1);
-    } else {
-
-        char net_zone[64] = {0};
-        xSemaphoreTake(__g_data_mutex, portMAX_DELAY);
-        memcpy(net_zone, &__g_time_model.net_zone, sizeof(net_zone));
-        xSemaphoreGive(__g_data_mutex);
-
-        if( strlen(net_zone) > 0 ) {
-            setenv("TZ", net_zone, 1);
-        }
+    if( strlen(net_zone) > 0 ) {
+        setenv("TZ", net_zone, 1);
     }
 }
 
 static void __time_cfg(struct view_data_time_cfg *p_cfg, bool set_time)
 {
-    if( p_cfg->auto_update ) {
-        __time_sync_enable();
-        __time_zone_set(p_cfg); 
-    } else {
-        __time_sync_stop();
-        struct timeval timestamp = { p_cfg->time, 0 };
-        if( set_time ) {
-            settimeofday(&timestamp, NULL);
-        }
-    }
+    __time_sync_enable();
+    __time_zone_set(p_cfg); 
 }
 
 static void __time_view_update_callback(void* arg)
@@ -167,7 +142,6 @@ static void __view_event_handler(void* handler_args, esp_event_base_t base, int3
             __time_cfg_print(p_cfg);
             __time_cfg_set(p_cfg);
             __time_cfg_save(p_cfg);
-            __time_cfg(p_cfg, p_cfg->set_time);  //config;
 
             bool time_format_24 = p_cfg->time_format_24;
             esp_event_post_to(view_event_handle, VIEW_EVENT_BASE, VIEW_EVENT_TIME, &time_format_24, sizeof(time_format_24), portMAX_DELAY);
@@ -185,10 +159,8 @@ static void __view_event_handler(void* handler_args, esp_event_base_t base, int3
                 fist = false;
                 struct view_data_time_cfg cfg;
                 __time_cfg_get(&cfg);
-                if( cfg.auto_update ) {
-                    __time_sync_stop();
-                    __time_sync_enable();
-                }
+                __time_sync_stop();
+                __time_sync_enable();
             } 
         }
     default:
@@ -205,7 +177,7 @@ static void __time_cfg_restore(void)
     
     size_t len = sizeof(cfg);
     
-    ret = storage_read(TIME_CFG_STORAGE, (void *)&cfg, &len);
+    ret = prism_storage_read(TIME_CFG_STORAGE, (void *)&cfg, &len);
     if( ret == ESP_OK  && len== (sizeof(cfg)) ) {
         ESP_LOGI(TAG, "cfg read successful");
         __time_cfg_set(&cfg);
@@ -217,17 +189,13 @@ static void __time_cfg_restore(void)
             ESP_LOGI(TAG, "cfg read err:%d", ret);
         }
 
-        cfg.auto_update = true;
-        cfg.auto_update_zone = true;
-        cfg.daylight = true;
         cfg.time_format_24 = true;
-        cfg.zone = 0;
         cfg.time = 0;
         __time_cfg_set(&cfg);
     }
 }
 
-int time_init(void)
+int prism_time_init(void)
 {
     __g_data_mutex  =  xSemaphoreCreateMutex();
 
@@ -264,10 +232,7 @@ int time_net_zone_set( char *p)
 
     struct view_data_time_cfg cfg;
     __time_cfg_get(&cfg);
-
-    if( cfg.auto_update ) {
-        __time_zone_set(&cfg); 
-    }
+    __time_zone_set(&cfg); 
     bool time_format_24 = cfg.time_format_24;
     return esp_event_post_to(view_event_handle, VIEW_EVENT_BASE, VIEW_EVENT_TIME, &time_format_24, sizeof(time_format_24), portMAX_DELAY);
 }

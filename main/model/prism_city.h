@@ -9,7 +9,7 @@
 extern "C" {
 #endif
 
-int city_init(void);
+int prism_city_init(void);
 
 #ifdef __cplusplus
 }

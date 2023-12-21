@@ -409,7 +409,7 @@ static int __ip_get(char *ip, int buf_len)
     char ip_request[200] = {0};
     int len;
     snprintf(ip_url, sizeof(ip_url),"https://api.ipify.org");
-    snprintf(ip_request, sizeof(ip_request),"GET %s HTTP/1.1\r\nHost: api.ipify.org\r\nUser-Agent: sensecap\r\n\r\n", ip_url);
+    snprintf(ip_request, sizeof(ip_request),"GET %s HTTP/1.1\r\nHost: api.ipify.org\r\nUser-Agent: prism\r\n\r\n", ip_url);
 
     len = https_get_request(cfg, ip_url, ip_request);
     if(len > 0) {
@@ -435,7 +435,7 @@ static int __time_zone_get(char *ip)
     char time_zone_request[200] = {0};
     int len  = 0;
     snprintf(time_zone_url, sizeof(time_zone_url),"https://www.timeapi.io/api/TimeZone/ip?ipAddress=%s",ip);
-    snprintf(time_zone_request, sizeof(time_zone_request),"GET %s HTTP/1.1\r\nHost: www.timeapi.io\r\nUser-Agent: sensecap\r\n\r\n", time_zone_url);
+    snprintf(time_zone_request, sizeof(time_zone_request),"GET %s HTTP/1.1\r\nHost: www.timeapi.io\r\nUser-Agent: prism\r\n\r\n", time_zone_url);
 
     len = https_get_request(cfg, time_zone_url, time_zone_request);
     if( len > 0) {
@@ -682,7 +682,7 @@ static int __time_zone_get(char *ip)
     char time_zone_request[200] = {0};
     int len  = 0;
     snprintf(time_zone_url, sizeof(time_zone_url),"https://www.timeapi.io/api/TimeZone/ip?ipAddress=%s",ip);
-    len = snprintf(time_zone_request, sizeof(time_zone_request),"GET %s HTTP/1.1\r\nHost: www.timeapi.io\r\nUser-Agent: sensecap\r\n\r\n", time_zone_url);
+    len = snprintf(time_zone_request, sizeof(time_zone_request),"GET %s HTTP/1.1\r\nHost: www.timeapi.io\r\nUser-Agent: prism\r\n\r\n", time_zone_url);
 
     len = https_mbedtls_request("www.timeapi.io", "443", time_zone_request, len);
 

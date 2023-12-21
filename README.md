@@ -53,6 +53,6 @@ Run `idf.py -p PORT flash monitor` to build, flash and monitor the project.
 See the [Getting Started Guide](https://docs.espressif.com/projects/esp-idf/en/latest/get-started/index.html) for full steps to configure and use ESP-IDF to build projects.
 
 
-### Special Thanks
+### References
 
-The SenseCAP Indicator ESP32 example indicator_basis project was used as a reference for the structure of this application with several files modified for this use case: https://github.com/Seeed-Solution/SenseCAP_Indicator_ESP32/tree/main/examples/indicator_basis
+The SenseCAP Indicator ESP32 example indicator_basis project was used as a reference for the structure of this application with several files used and modified for this project: https://github.com/Seeed-Solution/SenseCAP_Indicator_ESP32/tree/main/examples/indicator_basis
