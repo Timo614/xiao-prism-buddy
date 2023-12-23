@@ -22,9 +22,6 @@ void screen_browser_init(void)
     
     screen_browser_image = lv_img_create(screen_browser);
     lv_img_set_src(screen_browser_image, &ui_gifs_watermelon);
-    lv_img_set_src(screen_browser_image, &ui_gifs_confetti);
-    lv_img_set_src(screen_browser_image, &ui_gifs_hologram);
-    lv_img_set_src(screen_browser_image, &ui_gifs_fire);
     lv_obj_set_width( screen_browser_image, LV_SIZE_CONTENT);  /// 1
     lv_obj_set_height( screen_browser_image, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_align( screen_browser_image, LV_ALIGN_CENTER );

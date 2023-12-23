@@ -10,7 +10,7 @@ extern "C" {
 extern lv_obj_t *screen_setting_fade_text;
 extern lv_obj_t *screen_setting_fade_text_wifi;
 extern lv_obj_t *screen_setting_fade_text_title;
-extern lv_obj_t *screen_setting_fade_text_cfg;
+extern lv_obj_t *screen_setting_fade_text_toggle;
 
 void screen_setting_fade_text_init(void);
 

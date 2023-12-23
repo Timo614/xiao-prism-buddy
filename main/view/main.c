@@ -23,13 +23,6 @@ void screen_main_init(void)
 
     screen_main_weather = lv_img_create(screen_main);
     lv_img_set_src(screen_main_weather, &ui_weather_clear_day);
-    lv_img_set_src(screen_main_weather, &ui_weather_clear_night);
-    lv_img_set_src(screen_main_weather, &ui_weather_cloudy);
-    lv_img_set_src(screen_main_weather, &ui_weather_partly_cloudy_day);
-    lv_img_set_src(screen_main_weather, &ui_weather_partly_cloudy_night);
-    lv_img_set_src(screen_main_weather, &ui_weather_rain);
-    lv_img_set_src(screen_main_weather, &ui_weather_sleet);
-    lv_img_set_src(screen_main_weather, &ui_weather_snow);
     lv_obj_set_width( screen_main_weather, LV_SIZE_CONTENT);  /// 1
     lv_obj_set_height( screen_main_weather, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_x( screen_main_weather, 0 );

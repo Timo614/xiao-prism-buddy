@@ -48,8 +48,8 @@ static void __time_cfg_save(struct view_data_time_cfg *p_cfg )
 
 static void __time_cfg_print(struct view_data_time_cfg *p_cfg )
 {
-    printf( "time_format_24:%d, time:%ld,",  \
-      (bool) p_cfg->time_format_24,(long)p_cfg->time);
+    printf( "time_format_24:%d,",  \
+      (bool) p_cfg->time_format_24);
 }
 
 
@@ -183,7 +183,6 @@ static void __time_cfg_restore(void)
         }
 
         cfg.time_format_24 = true;
-        cfg.time = 0;
         __time_cfg_set(&cfg);
     }
 }

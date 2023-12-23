@@ -2,16 +2,10 @@
 
 pag7660 sensor;
 static const char *TAG = "sensor-model";
+static bool released_grab = true;
 
 static SemaphoreHandle_t  __g_data_mutex;
 static pag7660_gesture_t  __g_sensor_state;
-
-const char *cursor_str[] = {
-    NULL,
-    "Tap",
-    "Grab",
-    "Pinch",
-};
 
 static void gesture_sensor_poll_task(void *arg)
 {
@@ -22,12 +16,17 @@ static void gesture_sensor_poll_task(void *arg)
         gesture_event.data = 0;
 
         xSemaphoreTake(__g_data_mutex, portMAX_DELAY);
+        
         if (sensor.getResult(__g_sensor_state)) {
+            released_grab = __g_sensor_state.cursor.type != 3;
             switch (__g_sensor_state.type) {
             case 0:
-                if (__g_sensor_state.cursor.type == 1 && __g_sensor_state.cursor.select) {
-                    ESP_LOGI(TAG, "Tap");
-                    gesture_event.type = GESTURE_TAP;
+                if (__g_sensor_state.cursor.type == 3 && __g_sensor_state.cursor.select) {
+                    if (released_grab) {
+                        ESP_LOGI(TAG, "Grab");
+                        gesture_event.type = GESTURE_GRAB;
+                        released_grab = false;
+                    }
                 }
                 break;
             case 6:

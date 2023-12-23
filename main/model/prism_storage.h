@@ -1,9 +1,7 @@
 #ifndef STORAGE_H
 #define STORAGE_H
 
-#include "config.h"
 #include "esp_err.h"
-#include "view_data.h"
 
 #ifdef __cplusplus
 extern "C" {

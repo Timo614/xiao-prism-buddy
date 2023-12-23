@@ -23,6 +23,8 @@
 extern "C" {
 #endif
 
+#define USER_CURRENCY "usd"
+#define CURRENCY_SYMBOL "$"
 
 ESP_EVENT_DECLARE_BASE(VIEW_EVENT_BASE);
 

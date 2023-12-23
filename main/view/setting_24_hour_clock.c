@@ -26,14 +26,16 @@ void screen_setting_24_hour_clock_init(void) {
     lv_obj_set_width( screen_setting_24_hour_clock_title, LV_SIZE_CONTENT);  /// 1
     lv_obj_set_height( screen_setting_24_hour_clock_title, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_align( screen_setting_24_hour_clock_title, LV_ALIGN_LEFT_MID );
-    lv_label_set_text(screen_setting_24_hour_clock_title,"Time Format");
+    lv_label_set_text(screen_setting_24_hour_clock_title,"Use 24 Hour Time Format");
 
-    screen_setting_24_hour_clock_toggle = lv_dropdown_create(screen_setting_24_hour_clock);
-    lv_dropdown_set_options( screen_setting_24_hour_clock_toggle, "24H\n12H" );
-    lv_obj_set_width( screen_setting_24_hour_clock_toggle, 100);
-    lv_obj_set_height( screen_setting_24_hour_clock_toggle, LV_SIZE_CONTENT);   /// 1
+    screen_setting_24_hour_clock_toggle = lv_switch_create(screen_setting_24_hour_clock);
+    lv_obj_set_width( screen_setting_24_hour_clock_toggle, 50);
+    lv_obj_set_height( screen_setting_24_hour_clock_toggle, 25);
     lv_obj_set_align( screen_setting_24_hour_clock_toggle, LV_ALIGN_RIGHT_MID );
-    lv_obj_add_flag( screen_setting_24_hour_clock_toggle, LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
-    lv_obj_set_style_bg_color(screen_setting_24_hour_clock_toggle, lv_color_hex(0x6F6F6F), LV_PART_MAIN | LV_STATE_DEFAULT );
+    lv_obj_set_style_bg_color(screen_setting_24_hour_clock_toggle, lv_color_hex(0x363636), LV_PART_MAIN | LV_STATE_DEFAULT );
     lv_obj_set_style_bg_opa(screen_setting_24_hour_clock_toggle, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(screen_setting_24_hour_clock_toggle, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_CHECKED|LV_STATE_PRESSED );
+    lv_obj_set_style_bg_opa(screen_setting_24_hour_clock_toggle, 255, LV_PART_MAIN| LV_STATE_CHECKED|LV_STATE_PRESSED);
+    lv_obj_set_style_bg_color(screen_setting_24_hour_clock_toggle, lv_color_hex(0x529D53), LV_PART_INDICATOR | LV_STATE_CHECKED );
+    lv_obj_set_style_bg_opa(screen_setting_24_hour_clock_toggle, 255, LV_PART_INDICATOR| LV_STATE_CHECKED);
 }

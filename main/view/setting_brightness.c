@@ -32,17 +32,16 @@ void screen_setting_brightness_init(void) {
     lv_label_set_text(screen_setting_brightness_title,"Brightness");
 
     screen_setting_brightness_slider = lv_slider_create(screen_setting_brightness);
-    lv_obj_set_width( screen_setting_brightness_slider, 250);
+    lv_slider_set_range(screen_setting_brightness_slider, 0, 100);
+    lv_obj_set_width( screen_setting_brightness_slider, 200);
     lv_obj_set_height( screen_setting_brightness_slider, 15);
     lv_obj_set_x( screen_setting_brightness_slider, 0 );
     lv_obj_set_y( screen_setting_brightness_slider, 10 );
     lv_obj_set_align( screen_setting_brightness_slider, LV_ALIGN_CENTER );
     lv_obj_set_style_bg_color(screen_setting_brightness_slider, lv_color_hex(0x363636), LV_PART_MAIN | LV_STATE_DEFAULT );
     lv_obj_set_style_bg_opa(screen_setting_brightness_slider, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-
     lv_obj_set_style_bg_color(screen_setting_brightness_slider, lv_color_hex(0x529D53), LV_PART_INDICATOR | LV_STATE_DEFAULT );
     lv_obj_set_style_bg_opa(screen_setting_brightness_slider, 255, LV_PART_INDICATOR| LV_STATE_DEFAULT);
-
     lv_obj_set_style_bg_color(screen_setting_brightness_slider, lv_color_hex(0xFFFFFF), LV_PART_KNOB | LV_STATE_DEFAULT );
     lv_obj_set_style_bg_opa(screen_setting_brightness_slider, 255, LV_PART_KNOB| LV_STATE_DEFAULT);
 
