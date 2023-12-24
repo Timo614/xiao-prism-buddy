@@ -85,9 +85,8 @@ static void lv_port_disp_init(void)
     lcd.setColorDepth(16);
     lcd.fillScreen(TFT_BLACK);
 
-    lv_color_t * buf1 = (lv_color_t *)heap_caps_malloc(screenWidth * BUFF_SIZE * sizeof(lv_color_t),MALLOC_CAP_DMA);
-    lv_color_t * buf2 = (lv_color_t *)heap_caps_malloc(screenWidth * BUFF_SIZE * sizeof(lv_color_t),MALLOC_CAP_DMA);
-    lv_disp_draw_buf_init( &draw_buf, buf1, buf2, screenWidth * BUFF_SIZE );
+    lv_color_t * buf = (lv_color_t *)heap_caps_malloc(screenWidth * BUFF_SIZE * sizeof(lv_color_t),MALLOC_CAP_DMA);
+    lv_disp_draw_buf_init( &draw_buf, buf, NULL, screenWidth * BUFF_SIZE );
     lv_disp_drv_init( &disp_drv );
     disp_drv.hor_res = screenWidth;
     disp_drv.ver_res = screenHeight;

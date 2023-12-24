@@ -8,7 +8,6 @@ lv_obj_t *screen_setting;
 lv_obj_t *screen_setting_wifi;
 lv_obj_t *screen_setting_heading;
 lv_obj_t *screen_setting_text;
-lv_obj_t *screen_setting_indicator;
 
 void screen_setting_init(void) {
     screen_setting = lv_obj_create(NULL);
@@ -32,11 +31,5 @@ void screen_setting_init(void) {
     lv_obj_set_width( screen_setting_text, LV_SIZE_CONTENT);  /// 1
     lv_obj_set_height( screen_setting_text, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_align( screen_setting_text, LV_ALIGN_CENTER );
-    lv_label_set_text(screen_setting_text,"Tap to change setting screen\nRotate to toggle as needed");
-    
-    screen_setting_indicator = lv_img_create(screen_setting);
-    lv_img_set_src(screen_setting_indicator, &ui_img_wifi_disconnect_png);
-    lv_obj_set_width( screen_setting_indicator, LV_SIZE_CONTENT);  /// 1
-    lv_obj_set_height( screen_setting_indicator, LV_SIZE_CONTENT);   /// 1
-    lv_obj_set_align( screen_setting_indicator, LV_ALIGN_CENTER );
+    lv_label_set_text(screen_setting_text,"Grab to change setting screen\nRotate to toggle as needed");
 }

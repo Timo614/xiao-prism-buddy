@@ -11,7 +11,6 @@ extern lv_obj_t *screen_setting;
 extern lv_obj_t *screen_setting_wifi;
 extern lv_obj_t *screen_setting_heading;
 extern lv_obj_t *screen_setting_text;
-extern lv_obj_t *screen_setting_indicator;
 
 void screen_setting_init(void);
 

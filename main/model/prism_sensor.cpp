@@ -18,10 +18,12 @@ static void gesture_sensor_poll_task(void *arg)
         xSemaphoreTake(__g_data_mutex, portMAX_DELAY);
         
         if (sensor.getResult(__g_sensor_state)) {
-            released_grab = __g_sensor_state.cursor.type != 3;
+            if (!released_grab) {
+                released_grab = __g_sensor_state.type != 0;
+            }
             switch (__g_sensor_state.type) {
             case 0:
-                if (__g_sensor_state.cursor.type == 3 && __g_sensor_state.cursor.select) {
+                if (__g_sensor_state.cursor.type == 2) {
                     if (released_grab) {
                         ESP_LOGI(TAG, "Grab");
                         gesture_event.type = GESTURE_GRAB;
@@ -75,7 +77,7 @@ int prism_sensor_init(void)
     ESP_LOGI(TAG, "PAJ7620 init: OK");
     
 
-    xTaskCreate(gesture_sensor_poll_task, "gesture_sensor_poll_task", 1024, NULL, 2, NULL);
+    xTaskCreate(gesture_sensor_poll_task, "gesture_sensor_poll_task", 2048, NULL, 2, NULL);
 
     return 0;
 }
