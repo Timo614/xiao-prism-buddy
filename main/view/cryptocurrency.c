@@ -23,12 +23,6 @@ void screen_cryptocurrency_init(void) {
     lv_obj_set_y( screen_cryptocurrency_wifi, 20 );
     lv_obj_set_align( screen_cryptocurrency_wifi, LV_ALIGN_TOP_RIGHT );
     
-    screen_cryptocurrency_image = lv_gif_create(screen_cryptocurrency);
-    lv_gif_set_src(screen_cryptocurrency_image, &ui_coins_btc);
-    lv_obj_set_width( screen_cryptocurrency_image, LV_SIZE_CONTENT);  /// 1
-    lv_obj_set_height( screen_cryptocurrency_image, LV_SIZE_CONTENT);   /// 1
-    lv_obj_set_align( screen_cryptocurrency_image, LV_ALIGN_CENTER );
-
     screen_cryptocurrency_text = lv_label_create(screen_cryptocurrency);
     lv_obj_set_width( screen_cryptocurrency_text, LV_SIZE_CONTENT);  /// 1
     lv_obj_set_height( screen_cryptocurrency_text, LV_SIZE_CONTENT);   /// 1

@@ -19,12 +19,6 @@ void screen_browser_init(void)
     lv_obj_set_x( screen_browser_wifi, -20 );
     lv_obj_set_y( screen_browser_wifi, 20 );
     lv_obj_set_align( screen_browser_wifi, LV_ALIGN_TOP_RIGHT );
-    
-    screen_browser_image = lv_gif_create(screen_browser);
-    lv_gif_set_src(screen_browser_image, &ui_gifs_watermelon);
-    lv_obj_set_width( screen_browser_image, LV_SIZE_CONTENT);  /// 1
-    lv_obj_set_height( screen_browser_image, LV_SIZE_CONTENT);   /// 1
-    lv_obj_set_align( screen_browser_image, LV_ALIGN_CENTER );
 
     screen_browser_text = lv_label_create(screen_browser);
     lv_obj_set_width( screen_browser_text, LV_SIZE_CONTENT);  /// 1

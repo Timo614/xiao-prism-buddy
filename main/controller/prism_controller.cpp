@@ -5,6 +5,7 @@
 
 #include "main.h"
 #include "browser.h"
+#include "cryptocurrency.h"
 #include "prism_cryptocurrency.h"
 #include "cryptocurrency.h"
 #include "setting.h"
@@ -18,7 +19,7 @@
 #include <sys/time.h>
 
 #define ROTATION_COOLDOWN_MS 1000  // Cooldown period in milliseconds
-static int64_t last_rotation_time = 0;  // Timestamp of the last rotation
+static int64_t __g_last_rotation_time = 0;  // Timestamp of the last rotation
 
 /**********************
  *  STATIC VARIABLES
@@ -74,9 +75,9 @@ static const int image_length = 12;
 static const int cryptocurrency_length = 4;
 
 lv_obj_t *last_setting_screen;
-int selected_cryptocurrency;
-int selected_image;
-
+int __g_selected_cryptocurrency;
+int __g_selected_image;
+weather_type_t __g_weather;
 
 /**********************  display cfg **********************/
 static void __brightness_cfg_event_cb(lv_event_t * e)
@@ -106,12 +107,17 @@ void __save_settings(void) {
     esp_event_post_to(view_event_handle, VIEW_EVENT_BASE, VIEW_EVENT_TIME_CFG_APPLY, &time_config, sizeof(time_config), portMAX_DELAY);
 }
 
-void render_cryptocurrency(int index) {
+    void render_cryptocurrency(int index) {
+    ESP_LOGI(TAG, "rendering cryptocurrency %d", index);
     char page_text[40];
 
     int current_page = index + 1; 
     sprintf(page_text, "%d/%d", current_page, cryptocurrency_length);
     
+    screen_cryptocurrency_image = lv_gif_create(screen_cryptocurrency);
+    lv_obj_set_width( screen_cryptocurrency_image, LV_SIZE_CONTENT);  /// 1
+    lv_obj_set_height( screen_cryptocurrency_image, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_align( screen_cryptocurrency_image, LV_ALIGN_CENTER );
     lv_gif_set_src(screen_cryptocurrency_image, crypto_image_sources[index]);
     lv_label_set_text(screen_cryptocurrency_text, crypto_descriptions[index]);
     view_cryptocurrency_data* cryptocurrency_data = get_cryptocurrency_data();
@@ -158,14 +164,68 @@ void render_cryptocurrency(int index) {
 }
 
 void render_browser_image(int index) {
+    ESP_LOGI(TAG, "rendering browser image %d", index);
     char page_text[40];
 
     int current_page = index + 1; 
     sprintf(page_text, "%d/%d", current_page, image_length);
 
-    lv_gif_set_src(screen_browser_image, image_sources[index]);
+    screen_browser_image = lv_gif_create(screen_browser);
+    lv_obj_set_width( screen_browser_image, LV_SIZE_CONTENT);  /// 1
+    lv_obj_set_height( screen_browser_image, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_align( screen_browser_image, LV_ALIGN_CENTER );
     lv_label_set_text(screen_browser_text, image_descriptions[index]);
     lv_label_set_text(screen_browser_page, page_text);
+    lv_gif_set_src(screen_browser_image, image_sources[index]);
+}
+
+void render_weather(void) {
+    ESP_LOGI(TAG, "rendering weather %d", __g_weather);
+    screen_main_weather = lv_gif_create(screen_main);
+    lv_obj_set_width( screen_main_weather, LV_SIZE_CONTENT);  /// 1
+    lv_obj_set_height( screen_main_weather, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_x( screen_main_weather, 0 );
+    lv_obj_set_y( screen_main_weather, 0 );
+    lv_obj_set_align( screen_main_weather, LV_ALIGN_CENTER );
+    switch(__g_weather) {
+        case CLOUDY: {
+            lv_gif_set_src(screen_main_weather, &ui_weather_cloudy);
+            break;
+        }
+        case CLEAR_DAY: {
+            lv_gif_set_src(screen_main_weather, &ui_weather_clear_day);
+            break;
+        }
+        case CLEAR_NIGHT: {
+            lv_gif_set_src(screen_main_weather, &ui_weather_clear_night);
+            break;
+        }
+        case PARTLY_CLOUDY_DAY: {
+            lv_gif_set_src(screen_main_weather, &ui_weather_partly_cloudy_day);
+            break;
+        }
+        case PARTLY_CLOUDY_NIGHT: {
+            lv_gif_set_src(screen_main_weather, &ui_weather_partly_cloudy_night);
+            break;
+        }
+        case SLEET: {
+            lv_gif_set_src(screen_main_weather, &ui_weather_sleet);
+            break;
+        }
+        case SNOWY: {
+            lv_gif_set_src(screen_main_weather, &ui_weather_snow);
+            break;
+        }
+        case RAINY: {
+            lv_gif_set_src(screen_main_weather, &ui_weather_rain);
+            break;
+        }
+    }     
+}
+
+void render_main(lv_scr_load_anim_t animation_flag) {
+    render_weather();
+    _ui_screen_change( screen_main, animation_flag, 200, 0);
 }
 
 static void __view_event_handler(void* handler_args, esp_event_base_t base, int32_t id, void* event_data)
@@ -260,47 +320,14 @@ static void __view_event_handler(void* handler_args, esp_event_base_t base, int3
 
         case VIEW_EVENT_CRYPTOCURRENCY: {
             ESP_LOGI(TAG, "event: VIEW_EVENT_CRYPTOCURRENCY");
-            render_cryptocurrency(selected_cryptocurrency);
+            render_cryptocurrency(__g_selected_cryptocurrency);
+            break;
         }
 
         case VIEW_EVENT_WEATHER: {
             ESP_LOGI(TAG, "event: VIEW_EVENT_WEATHER");
-            weather_type_t *weather = ( weather_type_t *)event_data;
-            
-            switch(*weather) {
-                case CLOUDY: {
-                    lv_gif_set_src(screen_main_weather, &ui_weather_cloudy);
-                    break;
-                }
-                case CLEAR_DAY: {
-                    lv_gif_set_src(screen_main_weather, &ui_weather_clear_day);
-                    break;
-                }
-                case CLEAR_NIGHT: {
-                    lv_gif_set_src(screen_main_weather, &ui_weather_clear_night);
-                    break;
-                }
-                case PARTLY_CLOUDY_DAY: {
-                    lv_gif_set_src(screen_main_weather, &ui_weather_partly_cloudy_day);
-                    break;
-                }
-                case PARTLY_CLOUDY_NIGHT: {
-                    lv_gif_set_src(screen_main_weather, &ui_weather_partly_cloudy_night);
-                    break;
-                }
-                case SLEET: {
-                    lv_gif_set_src(screen_main_weather, &ui_weather_sleet);
-                    break;
-                }
-                case SNOWY: {
-                    lv_gif_set_src(screen_main_weather, &ui_weather_snow);
-                    break;
-                }
-                case RAINY: {
-                    lv_gif_set_src(screen_main_weather, &ui_weather_rain);
-                    break;
-                }
-            }     
+            __g_weather = *( weather_type_t* )event_data;
+            render_weather();
             break;
         }
         
@@ -319,51 +346,72 @@ static void __view_event_handler(void* handler_args, esp_event_base_t base, int3
             int64_t current_time = esp_timer_get_time() / 1000;  
             if (current_screen == screen_main) {
                 struct gesture_event_t  *p_data = (struct gesture_event_t *) event_data;
+
+                if (p_data->type == GESTURE_SWIPE_LEFT || p_data->type == GESTURE_SWIPE_RIGHT  ) {
+                    lv_obj_clean(screen_main_weather);
+                    lv_obj_del_async(screen_main_weather);
+                }
+
                 if (p_data->type == GESTURE_SWIPE_LEFT  ) {
+                    render_cryptocurrency(__g_selected_cryptocurrency);
                     _ui_screen_change( screen_cryptocurrency, LV_SCR_LOAD_ANIM_MOVE_LEFT, 200, 0);
                 } else if (p_data->type == GESTURE_SWIPE_RIGHT  ) {
                     _ui_screen_change( last_setting_screen, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 200, 0);
                 }
             } else if (current_screen == screen_browser) {
                 struct gesture_event_t  *p_data = (struct gesture_event_t *) event_data;
+
+                if (p_data->type == GESTURE_SWIPE_LEFT || p_data->type == GESTURE_SWIPE_RIGHT ||
+                p_data->type == GESTURE_ROTATE_LEFT || p_data->type == GESTURE_ROTATE_RIGHT) {
+                    lv_obj_clean(screen_browser_image);
+                    lv_obj_del_async(screen_browser_image);
+                }
+
                 if (p_data->type == GESTURE_SWIPE_LEFT  ) {
                     _ui_screen_change( last_setting_screen, LV_SCR_LOAD_ANIM_MOVE_LEFT, 200, 0);
                 } else if (p_data->type == GESTURE_SWIPE_RIGHT  ) {
+                    render_cryptocurrency(__g_selected_cryptocurrency);
                     _ui_screen_change( screen_cryptocurrency, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 200, 0);
                 } else if ((p_data->type == GESTURE_ROTATE_LEFT || p_data->type == GESTURE_ROTATE_RIGHT) && 
-                        (current_time - last_rotation_time > ROTATION_COOLDOWN_MS)) {
-                    last_rotation_time = current_time;
+                        (current_time - __g_last_rotation_time > ROTATION_COOLDOWN_MS)) {
+                    __g_last_rotation_time = current_time;
 
                     if (p_data->type == GESTURE_ROTATE_LEFT) {
-                        selected_image -= 1;
-                        selected_image += image_length;
-                        selected_image %= image_length;
-                        render_browser_image(selected_image);
+                        __g_selected_image -= 1;
+                        __g_selected_image += image_length;
+                        __g_selected_image %= image_length;
                     } else if (p_data->type == GESTURE_ROTATE_RIGHT) {
-                        selected_image += 1;
-                        selected_image %= image_length;
-                        render_browser_image(selected_image);
+                        __g_selected_image += 1;
+                        __g_selected_image %= image_length;
                     }
+                    
+                    render_browser_image(__g_selected_image);
                 }
             } else if (current_screen == screen_cryptocurrency) {
                 struct gesture_event_t  *p_data = (struct gesture_event_t *) event_data;
+
+                if (p_data->type == GESTURE_SWIPE_LEFT || p_data->type == GESTURE_SWIPE_RIGHT  ||
+                p_data->type == GESTURE_ROTATE_LEFT || p_data->type == GESTURE_ROTATE_RIGHT) {
+                    lv_obj_clean(screen_cryptocurrency_image);
+                    lv_obj_del_async(screen_cryptocurrency_image);
+                }
                 if (p_data->type == GESTURE_SWIPE_LEFT  ) {
+                    render_browser_image(__g_selected_image);
                     _ui_screen_change( screen_browser, LV_SCR_LOAD_ANIM_MOVE_LEFT, 200, 0);
                 } else if (p_data->type == GESTURE_SWIPE_RIGHT  ) {
-                    _ui_screen_change( screen_main, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 200, 0);
+                    render_main(LV_SCR_LOAD_ANIM_MOVE_RIGHT);
                 } else if ((p_data->type == GESTURE_ROTATE_LEFT || p_data->type == GESTURE_ROTATE_RIGHT) && 
-                        (current_time - last_rotation_time > ROTATION_COOLDOWN_MS)) {
-                    last_rotation_time = current_time;
+                        (current_time - __g_last_rotation_time > ROTATION_COOLDOWN_MS)) {
+                    __g_last_rotation_time = current_time;
                     if (p_data->type == GESTURE_ROTATE_LEFT) {
-                        selected_cryptocurrency -= 1;
-                        selected_cryptocurrency += cryptocurrency_length;
-                        selected_cryptocurrency %= cryptocurrency_length;
-                        render_cryptocurrency(selected_cryptocurrency);
+                        __g_selected_cryptocurrency -= 1;
+                        __g_selected_cryptocurrency += cryptocurrency_length;
+                        __g_selected_cryptocurrency %= cryptocurrency_length;
                     } else if (p_data->type == GESTURE_ROTATE_RIGHT) {
-                        selected_cryptocurrency += 1;
-                        selected_cryptocurrency %= cryptocurrency_length;
-                        render_cryptocurrency(selected_cryptocurrency);
+                        __g_selected_cryptocurrency += 1;
+                        __g_selected_cryptocurrency %= cryptocurrency_length;
                     }
+                    render_cryptocurrency(__g_selected_cryptocurrency);
                 }
             } else if (current_screen == screen_setting_24_hour_clock ||
                 current_screen == screen_setting_brightness ||
@@ -374,7 +422,7 @@ static void __view_event_handler(void* handler_args, esp_event_base_t base, int3
                 struct gesture_event_t  *p_data = (struct gesture_event_t *) event_data;
                 if (p_data->type == GESTURE_SWIPE_LEFT  ) {
                     __save_settings();
-                    _ui_screen_change( screen_main, LV_SCR_LOAD_ANIM_MOVE_LEFT, 200, 0);
+                    render_main(LV_SCR_LOAD_ANIM_MOVE_LEFT);
                 } else if (p_data->type == GESTURE_ROTATE_RIGHT || p_data->type == GESTURE_ROTATE_LEFT  ) {
                     if (current_screen == screen_setting_24_hour_clock) {
                         if (p_data->type == GESTURE_ROTATE_LEFT) {
@@ -407,7 +455,8 @@ static void __view_event_handler(void* handler_args, esp_event_base_t base, int3
                         }
                     }
                 } else if (p_data->type == GESTURE_SWIPE_RIGHT  ) {
-                    __save_settings();
+                    __save_settings();                    
+                    render_browser_image(__g_selected_image);
                     _ui_screen_change( screen_browser, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 200, 0);
                 } else if (p_data->type == GESTURE_GRAB) {
                     __save_settings();
@@ -434,6 +483,11 @@ static void __view_event_handler(void* handler_args, esp_event_base_t base, int3
 
 int prism_controller_init(void)
 {   
+    __g_selected_cryptocurrency = 0;
+    __g_selected_image = 0;
+    __g_weather = CLEAR_DAY;
+    render_weather();
+
     current_screen = screen_main;
     last_setting_screen = screen_setting;
     lv_obj_add_event_cb(screen_setting_brightness_slider, __brightness_cfg_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
