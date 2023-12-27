@@ -4,7 +4,7 @@
 #include "config.h"
 
 lv_obj_t *screen_cryptocurrency;
-lv_obj_t *screen_cryptocurrency_wifi;
+// lv_obj_t *screen_cryptocurrency_wifi;
 lv_obj_t *screen_cryptocurrency_image;
 lv_obj_t *screen_cryptocurrency_value;
 lv_obj_t *screen_cryptocurrency_change_percent;
@@ -15,13 +15,13 @@ void screen_cryptocurrency_init(void) {
     screen_cryptocurrency = lv_obj_create(NULL);
     lv_obj_clear_flag( screen_cryptocurrency, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
 
-    screen_cryptocurrency_wifi = lv_img_create(screen_cryptocurrency);
-    lv_img_set_src(screen_cryptocurrency_wifi, &ui_img_wifi_disconnect_png);
-    lv_obj_set_width( screen_cryptocurrency_wifi, LV_SIZE_CONTENT);  /// 1
-    lv_obj_set_height( screen_cryptocurrency_wifi, LV_SIZE_CONTENT);   /// 1
-    lv_obj_set_x( screen_cryptocurrency_wifi, -20 );
-    lv_obj_set_y( screen_cryptocurrency_wifi, 20 );
-    lv_obj_set_align( screen_cryptocurrency_wifi, LV_ALIGN_TOP_RIGHT );
+    // screen_cryptocurrency_wifi = lv_img_create(screen_cryptocurrency);
+    // lv_img_set_src(screen_cryptocurrency_wifi, &ui_img_wifi_disconnect_png);
+    // lv_obj_set_width( screen_cryptocurrency_wifi, LV_SIZE_CONTENT);  /// 1
+    // lv_obj_set_height( screen_cryptocurrency_wifi, LV_SIZE_CONTENT);   /// 1
+    // lv_obj_set_x( screen_cryptocurrency_wifi, -20 );
+    // lv_obj_set_y( screen_cryptocurrency_wifi, 20 );
+    // lv_obj_set_align( screen_cryptocurrency_wifi, LV_ALIGN_TOP_RIGHT );
     
     screen_cryptocurrency_text = lv_label_create(screen_cryptocurrency);
     lv_obj_set_width( screen_cryptocurrency_text, LV_SIZE_CONTENT);  /// 1

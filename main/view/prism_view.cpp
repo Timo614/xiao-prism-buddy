@@ -5,7 +5,6 @@
 #include "main.h"
 #include "setting_24_hour_clock.h"
 #include "setting_brightness.h"
-#include "setting_fade_text.h"
 #include "setting.h"
 
 #include "config.h"
@@ -25,7 +24,6 @@ void prism_view_init(void)
     screen_main_init();
     screen_setting_24_hour_clock_init();
     screen_setting_brightness_init();
-    screen_setting_fade_text_init();
     screen_setting_init();
 
     lv_disp_load_scr( screen_main);

@@ -25,7 +25,6 @@ struct view_data_wifi_connet_ret_msg
 struct view_data_display
 {
     int   brightness; //0~100
-    bool  fade_text_enabled;  
 };
 
 struct view_data_time_cfg

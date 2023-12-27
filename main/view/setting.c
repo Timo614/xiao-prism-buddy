@@ -2,7 +2,6 @@
 #include "ui_helpers.h"
 #include "main.h"
 #include "setting_brightness.h"
-#include "setting_fade_text.h"
 
 lv_obj_t *screen_setting;
 lv_obj_t *screen_setting_wifi;

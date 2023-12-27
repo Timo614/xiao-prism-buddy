@@ -70,7 +70,7 @@ static bool __display_st_get(void)
 
 static void __display_cfg_print(struct view_data_display *p_data )
 {
-    ESP_LOGI(TAG, "brightnes:%d, fade_text:%d",p_data->brightness, p_data->fade_text_enabled );
+    ESP_LOGI(TAG, "brightnes:%d",p_data->brightness );
 }
 
 static void __lcd_bl_set(int brightness )
@@ -98,13 +98,6 @@ static void __lcd_bl_off(void)
     __display_st_set(false);
 }
 
-static void __fade_text_timer_callback(void* arg)
-{
-    ESP_LOGI(TAG, "sleep mode, lcd bl off");
-    __lcd_bl_off();
-    __timer_st_set(false);
-}
-
 static void __timer_stop(void)
 {
     if(  __timer_st_get()) {
@@ -114,33 +107,6 @@ static void __timer_stop(void)
         __timer_st_set(false);
     }
 }
-
-static void __fade_text_restart(bool en)
-{
-    __timer_stop();   
-    if( ! en ) {
-        return;
-    }
-    __timer_st_set(true);
-    xSemaphoreTake(__g_timer_mutex, portMAX_DELAY);
-    ESP_ERROR_CHECK(esp_timer_start_once(sleep_timer_handle, (uint64_t) 5 *60 * 1000000 ));
-    xSemaphoreGive(__g_timer_mutex);
-}
-
-static void __fade_text_init( bool  fade_text_enabled)
-{
-    const esp_timer_create_args_t timer_args = {
-            .callback = &__fade_text_timer_callback,
-            /* argument specified here will be passed to timer callback function */
-            .arg = (void*) sleep_timer_handle,
-            .name = "sleep mode"
-    };
-    ESP_ERROR_CHECK( esp_timer_create(&timer_args, &sleep_timer_handle));
-    
-    __timer_st_set(false);
-    __fade_text_restart(fade_text_enabled);
-}
-
 
 static void __display_cfg_save(struct view_data_display *p_data ) 
 {
@@ -174,7 +140,6 @@ static void __display_cfg_restore(void)
         } 
         
         cfg.brightness = 80;
-        cfg.fade_text_enabled = false;
         __display_cfg_set(&cfg);
     }
 }
@@ -204,7 +169,6 @@ static void __view_event_handler(void* handler_args, esp_event_base_t base, int3
 
             __display_cfg_set(p_cfg);
             __display_cfg_save(p_cfg);
-            __fade_text_restart(p_cfg->fade_text_enabled);
             break;
         }
     
@@ -227,8 +191,6 @@ int prism_display_init(void)
     __lcd_bl_set(cfg.brightness);
     __display_st_set(true);
 
-    __fade_text_init(cfg.fade_text_enabled);
-
     esp_event_post_to(view_event_handle, VIEW_EVENT_BASE, VIEW_EVENT_DISPLAY_CFG, &cfg, sizeof(cfg), portMAX_DELAY);
 
     ESP_ERROR_CHECK(esp_event_handler_instance_register_with(view_event_handle, 
@@ -236,17 +198,6 @@ int prism_display_init(void)
                                                             __view_event_handler, NULL, NULL));
 
     init_done_flag = true;
-    return 0;
-}
-
-int prism_display_sleep_restart(void)
-{
-    if( !init_done_flag ) {
-        return 0;
-    }
-    struct view_data_display cfg;
-    __display_cfg_get(&cfg);
-    __fade_text_restart(cfg.fade_text_enabled);
     return 0;
 }
 
@@ -258,7 +209,6 @@ bool prism_display_st_get(void)
 void prism_display_on(void)
 {
    __lcd_bl_on();
-   prism_display_sleep_restart();
 }
 
 void prism_display_off(void)

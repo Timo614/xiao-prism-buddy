@@ -11,7 +11,6 @@
 #include "setting.h"
 #include "setting_24_hour_clock.h"
 #include "setting_brightness.h"
-#include "setting_fade_text.h"
 
 #include "view_data.h"
 #include "ui_helpers.h"
@@ -42,21 +41,6 @@ static const void *image_sources[] = {
     &ui_weather_snow
 };
 
-static const char *image_descriptions[] = {
-    "Watermelon",
-    "Confetti",
-    "Hologram",
-    "Fire",
-    "Weather - Clear Day",
-    "Weather - Clear Night",
-    "Weather - Cloudy",
-    "Weather - Partly Cloudy Day",
-    "Weather - Partly Cloudy Night",
-    "Weather - Rain",
-    "Weather - Sleet",
-    "Weather - Snow"
-};
-
 static const void *crypto_image_sources[] = {
     &ui_coins_btc,
     &ui_coins_doge,
@@ -80,22 +64,9 @@ int __g_selected_image;
 weather_type_t __g_weather;
 
 /**********************  display cfg **********************/
-static void __brightness_cfg_event_cb(lv_event_t * e)
-{
-    lv_obj_t * slider = lv_event_get_target(e);
-    int32_t value = lv_slider_get_value(slider);
-    
-    esp_event_post_to(view_event_handle, VIEW_EVENT_BASE, VIEW_EVENT_BRIGHTNESS_UPDATE, &value, sizeof(value), portMAX_DELAY);
-}
-
 void __save_settings(void) {
     struct view_data_display data_config;
     data_config.brightness = lv_slider_get_value(screen_setting_brightness_slider);
-    if( lv_obj_has_state( screen_setting_fade_text_toggle, LV_STATE_CHECKED) ) {
-        data_config.fade_text_enabled = true;
-    } else {
-        data_config.fade_text_enabled = false;
-    }
     esp_event_post_to(view_event_handle, VIEW_EVENT_BASE, VIEW_EVENT_DISPLAY_CFG_APPLY, &data_config, sizeof(data_config), portMAX_DELAY);
 
     struct view_data_time_cfg time_config;
@@ -107,19 +78,20 @@ void __save_settings(void) {
     esp_event_post_to(view_event_handle, VIEW_EVENT_BASE, VIEW_EVENT_TIME_CFG_APPLY, &time_config, sizeof(time_config), portMAX_DELAY);
 }
 
-    void render_cryptocurrency(int index) {
+void render_cryptocurrency(int index) {
     ESP_LOGI(TAG, "rendering cryptocurrency %d", index);
     char page_text[40];
 
     int current_page = index + 1; 
     sprintf(page_text, "%d/%d", current_page, cryptocurrency_length);
     
-    screen_cryptocurrency_image = lv_gif_create(screen_cryptocurrency);
-    lv_obj_set_width( screen_cryptocurrency_image, LV_SIZE_CONTENT);  /// 1
-    lv_obj_set_height( screen_cryptocurrency_image, LV_SIZE_CONTENT);   /// 1
+    screen_cryptocurrency_image = lv_img_create(screen_cryptocurrency);
+    lv_obj_set_width( screen_cryptocurrency_image, LV_SIZE_CONTENT);
+    lv_obj_set_height( screen_cryptocurrency_image, LV_SIZE_CONTENT); 
     lv_obj_set_align( screen_cryptocurrency_image, LV_ALIGN_CENTER );
-    lv_gif_set_src(screen_cryptocurrency_image, crypto_image_sources[index]);
+    lv_img_set_src(screen_cryptocurrency_image, crypto_image_sources[index]);
     lv_label_set_text(screen_cryptocurrency_text, crypto_descriptions[index]);
+
     view_cryptocurrency_data* cryptocurrency_data = get_cryptocurrency_data();
     double value, value_24;
     switch (index) {
@@ -165,25 +137,18 @@ void __save_settings(void) {
 
 void render_browser_image(int index) {
     ESP_LOGI(TAG, "rendering browser image %d", index);
-    char page_text[40];
-
-    int current_page = index + 1; 
-    sprintf(page_text, "%d/%d", current_page, image_length);
-
     screen_browser_image = lv_gif_create(screen_browser);
-    lv_obj_set_width( screen_browser_image, LV_SIZE_CONTENT);  /// 1
-    lv_obj_set_height( screen_browser_image, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_width( screen_browser_image, LV_SIZE_CONTENT);
+    lv_obj_set_height( screen_browser_image, LV_SIZE_CONTENT); 
     lv_obj_set_align( screen_browser_image, LV_ALIGN_CENTER );
-    lv_label_set_text(screen_browser_text, image_descriptions[index]);
-    lv_label_set_text(screen_browser_page, page_text);
     lv_gif_set_src(screen_browser_image, image_sources[index]);
 }
 
 void render_weather(void) {
     ESP_LOGI(TAG, "rendering weather %d", __g_weather);
     screen_main_weather = lv_gif_create(screen_main);
-    lv_obj_set_width( screen_main_weather, LV_SIZE_CONTENT);  /// 1
-    lv_obj_set_height( screen_main_weather, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_width( screen_main_weather, LV_SIZE_CONTENT);
+    lv_obj_set_height( screen_main_weather, LV_SIZE_CONTENT); 
     lv_obj_set_x( screen_main_weather, 0 );
     lv_obj_set_y( screen_main_weather, 0 );
     lv_obj_set_align( screen_main_weather, LV_ALIGN_CENTER );
@@ -278,11 +243,6 @@ static void __view_event_handler(void* handler_args, esp_event_base_t base, int3
             struct view_data_display *p_cfg = ( struct view_data_display *)event_data;
             
             lv_slider_set_value(screen_setting_brightness_slider, p_cfg->brightness, LV_ANIM_OFF);
-            if( !p_cfg->fade_text_enabled ) {
-                lv_obj_clear_state( screen_setting_fade_text_toggle, LV_STATE_CHECKED);
-            } else {
-                lv_obj_add_state( screen_setting_fade_text_toggle, LV_STATE_CHECKED);
-            }
             break;
         }
 
@@ -308,26 +268,29 @@ static void __view_event_handler(void* handler_args, esp_event_base_t base, int3
                 p_src = &ui_img_wifi_disconnect_png;
             }
 
-            lv_img_set_src(screen_main_wifi , (void *)p_src);
             lv_img_set_src(screen_setting_24_hour_clock_wifi , (void *)p_src);
             lv_img_set_src(screen_setting_brightness_wifi , (void *)p_src);
-            lv_img_set_src(screen_setting_fade_text_wifi , (void *)p_src);
             lv_img_set_src(screen_setting_wifi , (void *)p_src);
-            lv_img_set_src(screen_browser_wifi , (void *)p_src);
-            lv_img_set_src(screen_cryptocurrency_wifi , (void *)p_src);
             break;
         }
 
         case VIEW_EVENT_CRYPTOCURRENCY: {
             ESP_LOGI(TAG, "event: VIEW_EVENT_CRYPTOCURRENCY");
-            render_cryptocurrency(__g_selected_cryptocurrency);
+            if (current_screen == screen_cryptocurrency) {
+                render_cryptocurrency(__g_selected_cryptocurrency);
+            }
             break;
         }
 
         case VIEW_EVENT_WEATHER: {
             ESP_LOGI(TAG, "event: VIEW_EVENT_WEATHER");
             __g_weather = *( weather_type_t* )event_data;
-            render_weather();
+            
+            if (current_screen == screen_main) {
+                lv_obj_clean(screen_main_weather);
+                lv_obj_del_async(screen_main_weather);
+                render_weather();
+            }
             break;
         }
         
@@ -361,8 +324,7 @@ static void __view_event_handler(void* handler_args, esp_event_base_t base, int3
             } else if (current_screen == screen_browser) {
                 struct gesture_event_t  *p_data = (struct gesture_event_t *) event_data;
 
-                if (p_data->type == GESTURE_SWIPE_LEFT || p_data->type == GESTURE_SWIPE_RIGHT ||
-                p_data->type == GESTURE_ROTATE_LEFT || p_data->type == GESTURE_ROTATE_RIGHT) {
+                if (p_data->type == GESTURE_SWIPE_LEFT || p_data->type == GESTURE_SWIPE_RIGHT) {
                     lv_obj_clean(screen_browser_image);
                     lv_obj_del_async(screen_browser_image);
                 }
@@ -372,29 +334,15 @@ static void __view_event_handler(void* handler_args, esp_event_base_t base, int3
                 } else if (p_data->type == GESTURE_SWIPE_RIGHT  ) {
                     render_cryptocurrency(__g_selected_cryptocurrency);
                     _ui_screen_change( screen_cryptocurrency, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 200, 0);
-                } else if ((p_data->type == GESTURE_ROTATE_LEFT || p_data->type == GESTURE_ROTATE_RIGHT) && 
-                        (current_time - __g_last_rotation_time > ROTATION_COOLDOWN_MS)) {
-                    __g_last_rotation_time = current_time;
-
-                    if (p_data->type == GESTURE_ROTATE_LEFT) {
-                        __g_selected_image -= 1;
-                        __g_selected_image += image_length;
-                        __g_selected_image %= image_length;
-                    } else if (p_data->type == GESTURE_ROTATE_RIGHT) {
-                        __g_selected_image += 1;
-                        __g_selected_image %= image_length;
-                    }
-                    
-                    render_browser_image(__g_selected_image);
-                }
+                } 
             } else if (current_screen == screen_cryptocurrency) {
                 struct gesture_event_t  *p_data = (struct gesture_event_t *) event_data;
 
-                if (p_data->type == GESTURE_SWIPE_LEFT || p_data->type == GESTURE_SWIPE_RIGHT  ||
-                p_data->type == GESTURE_ROTATE_LEFT || p_data->type == GESTURE_ROTATE_RIGHT) {
+                if (p_data->type == GESTURE_SWIPE_LEFT || p_data->type == GESTURE_SWIPE_RIGHT) {
                     lv_obj_clean(screen_cryptocurrency_image);
                     lv_obj_del_async(screen_cryptocurrency_image);
                 }
+
                 if (p_data->type == GESTURE_SWIPE_LEFT  ) {
                     render_browser_image(__g_selected_image);
                     _ui_screen_change( screen_browser, LV_SCR_LOAD_ANIM_MOVE_LEFT, 200, 0);
@@ -415,7 +363,6 @@ static void __view_event_handler(void* handler_args, esp_event_base_t base, int3
                 }
             } else if (current_screen == screen_setting_24_hour_clock ||
                 current_screen == screen_setting_brightness ||
-                current_screen == screen_setting_fade_text ||
                 current_screen == screen_setting
                 ) {
                 last_setting_screen = current_screen;
@@ -437,7 +384,8 @@ static void __view_event_handler(void* handler_args, esp_event_base_t base, int3
                             if (slider_value < 0) {
                                 slider_value = 0;
                             }
-                            lv_slider_set_value(screen_setting_brightness_slider, slider_value, LV_ANIM_ON);
+                            lv_slider_set_value(screen_setting_brightness_slider, slider_value, LV_ANIM_ON);    
+                            esp_event_post_to(view_event_handle, VIEW_EVENT_BASE, VIEW_EVENT_BRIGHTNESS_UPDATE, &slider_value, sizeof(slider_value), portMAX_DELAY);
                         } else if (p_data->type == GESTURE_ROTATE_RIGHT) {
                             int slider_value = lv_slider_get_value(screen_setting_brightness_slider);
                             slider_value = slider_value + 5;
@@ -445,14 +393,9 @@ static void __view_event_handler(void* handler_args, esp_event_base_t base, int3
                                 slider_value = 100;
                             }
                             lv_slider_set_value(screen_setting_brightness_slider, slider_value, LV_ANIM_ON);
+                            esp_event_post_to(view_event_handle, VIEW_EVENT_BASE, VIEW_EVENT_BRIGHTNESS_UPDATE, &slider_value, sizeof(slider_value), portMAX_DELAY);
                         }
 
-                    } else if (current_screen == screen_setting_fade_text) {
-                        if (p_data->type == GESTURE_ROTATE_LEFT) {
-                            lv_obj_clear_state(screen_setting_fade_text_toggle, LV_STATE_CHECKED);
-                        } else if (p_data->type == GESTURE_ROTATE_RIGHT  ) {
-                            lv_obj_add_state(screen_setting_fade_text_toggle, LV_STATE_CHECKED);
-                        }
                     }
                 } else if (p_data->type == GESTURE_SWIPE_RIGHT  ) {
                     __save_settings();                    
@@ -465,8 +408,6 @@ static void __view_event_handler(void* handler_args, esp_event_base_t base, int3
                         next_screen = screen_setting_24_hour_clock;
                     } else if (current_screen == screen_setting_24_hour_clock) {
                         next_screen = screen_setting_brightness;
-                    } else if (current_screen == screen_setting_brightness) {
-                        next_screen = screen_setting_fade_text;
                     } else {
                         next_screen = screen_setting;
                     }
@@ -490,7 +431,6 @@ int prism_controller_init(void)
 
     current_screen = screen_main;
     last_setting_screen = screen_setting;
-    lv_obj_add_event_cb(screen_setting_brightness_slider, __brightness_cfg_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
     
     int i  = 0;
     for( i = 0; i < VIEW_EVENT_ALL; i++ ) {
