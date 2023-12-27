@@ -12,12 +12,10 @@ void screen_main_init(void)
     lv_obj_clear_flag( screen_main, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
 
     screen_main_time = lv_label_create(screen_main);
-    lv_obj_set_width( screen_main_time, 200);
-    lv_obj_set_height( screen_main_time, 170);
-    lv_obj_set_x( screen_main_time, -110 );
-    lv_obj_set_y( screen_main_time, 0 );
+    lv_obj_set_y( screen_main_time, -30 );
+    lv_obj_set_x( screen_main_time, 10 );
     lv_obj_set_align( screen_main_time, LV_ALIGN_BOTTOM_MID );
     lv_obj_clear_flag( screen_main_time, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
     lv_label_set_text(screen_main_time,"00:00");
-    lv_obj_set_style_text_font(screen_main_time, &lv_font_montserrat_8, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(screen_main_time, &lv_font_montserrat_26, LV_PART_MAIN| LV_STATE_DEFAULT);
 }

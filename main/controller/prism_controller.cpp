@@ -83,12 +83,13 @@ void render_cryptocurrency(int index) {
     char page_text[40];
 
     int current_page = index + 1; 
-    sprintf(page_text, "%d/%d", current_page, cryptocurrency_length);
+    sprintf(page_text, "%d / %d", current_page, cryptocurrency_length);
     
     screen_cryptocurrency_image = lv_img_create(screen_cryptocurrency);
     lv_obj_set_width( screen_cryptocurrency_image, LV_SIZE_CONTENT);
     lv_obj_set_height( screen_cryptocurrency_image, LV_SIZE_CONTENT); 
-    lv_obj_set_align( screen_cryptocurrency_image, LV_ALIGN_CENTER );
+    lv_obj_set_align( screen_cryptocurrency_image, LV_ALIGN_TOP_MID );
+    lv_obj_set_y( screen_cryptocurrency_image, 10 );
     lv_img_set_src(screen_cryptocurrency_image, crypto_image_sources[index]);
     lv_label_set_text(screen_cryptocurrency_text, crypto_descriptions[index]);
 
@@ -119,19 +120,19 @@ void render_cryptocurrency(int index) {
     }
 
     char cryptocurrency_value[20];
-    sprintf(cryptocurrency_value, "%s%f", CURRENCY_SYMBOL, value);
+    sprintf(cryptocurrency_value, "%s%0.2f", CURRENCY_SYMBOL, value);
     lv_label_set_text(screen_cryptocurrency_value, cryptocurrency_value);
     
-    double change_percent = (value - value_24) / value_24 * 100.0;
+    double change_percent;
+    if (value_24 == 0.0) {
+        change_percent = 0.0;
+    } else {
+        change_percent = (value - value_24) / value_24 * 100.0;
+    }
     change_percent = round(change_percent * 100) / 100;
     char cryptocurrency_percent[20];
-    sprintf(cryptocurrency_value, "%f%%", change_percent);
+    sprintf(cryptocurrency_percent, "%0.2f%%", change_percent);
     lv_label_set_text(screen_cryptocurrency_change_percent, cryptocurrency_percent);
-
-    char label_text[200];
-    sprintf(label_text, "%s%f [%s%f]", CURRENCY_SYMBOL, 0.0, CURRENCY_SYMBOL, 0.0);
-    lv_label_set_text(screen_cryptocurrency_value, label_text);
-
     lv_label_set_text(screen_cryptocurrency_page, page_text);    
 }
 
@@ -151,7 +152,7 @@ void render_weather(void) {
     lv_obj_set_height( screen_main_weather, LV_SIZE_CONTENT); 
     lv_obj_set_x( screen_main_weather, 0 );
     lv_obj_set_y( screen_main_weather, 0 );
-    lv_obj_set_align( screen_main_weather, LV_ALIGN_CENTER );
+    lv_obj_set_align( screen_main_weather, LV_ALIGN_TOP_MID );
     switch(__g_weather) {
         case CLOUDY: {
             lv_gif_set_src(screen_main_weather, &ui_weather_cloudy);
