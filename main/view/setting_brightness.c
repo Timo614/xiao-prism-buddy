@@ -26,7 +26,6 @@ void screen_setting_brightness_init(void) {
     screen_setting_brightness_title = lv_label_create(screen_setting_brightness);
     lv_obj_set_width( screen_setting_brightness_title, LV_SIZE_CONTENT);  /// 1
     lv_obj_set_height( screen_setting_brightness_title, LV_SIZE_CONTENT);   /// 1
-    lv_obj_set_x( screen_setting_brightness_title, 1 );
     lv_obj_set_y( screen_setting_brightness_title, 50 );
     lv_obj_set_align( screen_setting_brightness_title, LV_ALIGN_TOP_MID );
     lv_label_set_text(screen_setting_brightness_title,"Brightness");
