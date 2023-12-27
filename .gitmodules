@@ -1,9 +1,9 @@
-[submodule "components/lvgl"]
-	path = components/lvgl
-	url = https://github.com/lvgl/lvgl.git
 [submodule "components/LovyanGFX"]
 	path = components/LovyanGFX
 	url = https://github.com/lovyan03/LovyanGFX.git
 [submodule "components/Grove_Gesture"]
 	path = components/Grove_Gesture
 	url = https://github.com/Cosmic-Bee/Grove_Gesture.git
+[submodule "components/lvgl"]
+	path = components/lvgl
+	url = https://github.com/Timo614/lvgl.git
