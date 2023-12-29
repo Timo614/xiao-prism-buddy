@@ -50,7 +50,10 @@ extern "C" void app_main(void)
     lv_port_sem_give();
 
     prism_model_init();
+    
+    lv_port_sem_take();
     prism_controller_init();
+    lv_port_sem_give();
 
     // static char buffer[128];    /* Make sure buffer is enough for `sprintf` */
     while (1) {

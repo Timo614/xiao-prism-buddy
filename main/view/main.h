@@ -17,8 +17,8 @@ LV_IMG_DECLARE( ui_weather_sleet );
 LV_IMG_DECLARE( ui_weather_snow );
 
 extern lv_obj_t *screen_main;
-extern lv_obj_t *screen_main_weather;
 extern lv_obj_t *screen_main_time;
+extern lv_obj_t *screen_main_weather;
 
 void screen_main_init(void);
 

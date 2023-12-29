@@ -5,6 +5,7 @@
 #include "prism_city.h"
 #include "prism_cryptocurrency.h"
 #include "prism_weather.h"
+#include "prism_wifi.h"
 
 int prism_model_init(void)
 {
@@ -14,5 +15,6 @@ int prism_model_init(void)
     prism_cryptocurrency_init();
     prism_weather_init();
     prism_display_init(); 
+    prism_wifi_init();
     return 0;
 }

@@ -37,3 +37,4 @@ build
 *.app
 
 sdkconfig
+sdkconfig.old

@@ -15,8 +15,6 @@ LV_IMG_DECLARE( ui_gifs_watermelon );
 extern lv_obj_t *screen_browser;
 extern lv_obj_t *screen_browser_image;
 
-void screen_browser_init(void);
-
 #ifdef __cplusplus
 } /*extern "C"*/
 #endif

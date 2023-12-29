@@ -3,6 +3,7 @@
 #include "esp_tls.h"
 #include "esp_http_client.h"
 #include "cJSON.h"
+#include "esp_crt_bundle.h"
 
 #include "lwip/err.h"
 #include "lwip/sockets.h"
@@ -24,7 +25,7 @@
 static const char *TAG = "city";
 static struct view_data_city __g_city_model;
 static SemaphoreHandle_t   __g_city_http_com_sem;
-static bool net_flag = false;
+static bool  net_enabled = false;
 static char local_response_buffer[MAX_HTTP_OUTPUT_BUFFER] = {0};
 
 static int __city_data_parse(const char *p_str)
@@ -96,7 +97,7 @@ static int __city_get(void)
     struct in_addr *addr;
     int s, r;
     int retry=0;
-    while(net_flag) {
+    while( net_enabled) {
         if( retry > 5) {
             return -1;
         }
@@ -287,8 +288,7 @@ exit:
 static int __ip_get(char *ip, int buf_len)
 {
     esp_tls_cfg_t cfg = {
-        .cacert_buf = (const unsigned char *) timeapi_root_cert_pem_start,
-        .cacert_bytes = timeapi_root_cert_pem_end - timeapi_root_cert_pem_start,
+        .crt_bundle_attach = esp_crt_bundle_attach,
     };
     char ip_url[128] = {0};
     char ip_request[200] = {0};
@@ -312,15 +312,14 @@ static int __ip_get(char *ip, int buf_len)
 static int __time_zone_get(char *ip)
 {
     esp_tls_cfg_t cfg = {
-        .cacert_buf = (const unsigned char *) timeapi_root_cert_pem_start,
-        .cacert_bytes = timeapi_root_cert_pem_end - timeapi_root_cert_pem_start,
+        .crt_bundle_attach = esp_crt_bundle_attach,
     };
 
     char time_zone_url[128] = {0};
     char time_zone_request[200] = {0};
     int len  = 0;
     snprintf(time_zone_url, sizeof(time_zone_url),"https://www.timeapi.io/api/TimeZone/ip?ipAddress=%s",ip);
-    snprintf(time_zone_request, sizeof(time_zone_request),"GET %s HTTP/1.1\r\nHost: www.timeapi.io\r\nUser-Agent: prism\r\n\r\n", time_zone_url);
+    snprintf(time_zone_request, sizeof(time_zone_request),"GET %s HTTP/1.1\r\nHost: www.timeapi.io\r\nUser-Agent: esp-idf/1.0 esp32\r\n\r\n", time_zone_url);
 
     len = https_get_request(cfg, time_zone_url, time_zone_request);
     if( len > 0) {
@@ -360,7 +359,7 @@ static void __prism_city_http_task(void *p_arg)
 
     while(1) {
 
-        if( net_flag  && !city_flag) {
+        if(  net_enabled  && !city_flag) {
             
             err = __city_get();
             if( err == 0) {
@@ -378,7 +377,7 @@ static void __prism_city_http_task(void *p_arg)
             }
         }
 
-        if( net_flag && !ip_flag ) {
+        if(  net_enabled && !ip_flag ) {
             ESP_LOGI(TAG, "Get ip...");
             err = __ip_get(__g_city_model.ip, sizeof(__g_city_model.ip));
             if( err ==0 ) {
@@ -386,7 +385,7 @@ static void __prism_city_http_task(void *p_arg)
                 ip_flag= true;
             }
         }
-        if(  net_flag && ip_flag && !time_zone_flag) {
+        if(   net_enabled && ip_flag && !time_zone_flag) {
             ESP_LOGI(TAG, "Get time zone...");
             err =  __time_zone_get(__g_city_model.ip); 
             if( err == 0) {
@@ -417,16 +416,24 @@ static void __prism_city_http_task(void *p_arg)
 static void __view_event_handler(void* handler_args, esp_event_base_t base, int32_t id, void* event_data)
 {
     switch (id)
-    {
+    {   
         case VIEW_EVENT_WIFI_ST: {
             ESP_LOGI(TAG, "event: VIEW_EVENT_WIFI_ST");
             struct view_data_wifi_st *p_st = ( struct view_data_wifi_st *)event_data;
             if( p_st->is_connected) {
-                net_flag = true;
-                xSemaphoreGive(__g_city_http_com_sem); //right away  get city and time zone
+                net_enabled = true;
             } else {
-                net_flag = false;
+                net_enabled = false;
             }
+            break;
+        }
+        case VIEW_EVENT_TIME: {
+            ESP_LOGI(TAG, "event: VIEW_EVENT_TIME");
+            // On the first time event after net has been enabled release semaphore allowing logic to run
+            if(!net_enabled) {
+                return;
+            }
+            xSemaphoreGive(__g_city_http_com_sem); //right away  get city and time zone
             break;
         }
         default:
@@ -442,6 +449,9 @@ int prism_city_init(void)
 
     ESP_ERROR_CHECK(esp_event_handler_instance_register_with(view_event_handle, 
                                                         VIEW_EVENT_BASE, VIEW_EVENT_WIFI_ST, 
+                                                        __view_event_handler, NULL, NULL));      
+    ESP_ERROR_CHECK(esp_event_handler_instance_register_with(view_event_handle, 
+                                                        VIEW_EVENT_BASE, VIEW_EVENT_TIME, 
                                                         __view_event_handler, NULL, NULL));                                                        
     return 0;
 }

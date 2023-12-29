@@ -59,7 +59,7 @@ static void gesture_sensor_poll_task(void *arg)
             esp_event_post_to(view_event_handle, VIEW_EVENT_BASE, VIEW_EVENT_SENSOR_DATA, &gesture_event, sizeof(gesture_event_t), portMAX_DELAY);
         }
 
-        vTaskDelay(pdMS_TO_TICKS(100));
+        vTaskDelay(pdMS_TO_TICKS(200));
     }
 }
 

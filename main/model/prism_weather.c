@@ -5,6 +5,7 @@
 #include "cJSON.h"
 #include "prism_time.h"
 #include "json_helper.h"
+#include "esp_crt_bundle.h"
 
 #include "lwip/err.h"
 #include "lwip/sockets.h"
@@ -142,8 +143,7 @@ exit:
 static int __weather_get(double latitude, double longitude)
 {
     esp_tls_cfg_t cfg = {
-        .cacert_buf = (const unsigned char *) weather_cert_pem_start,
-        .cacert_bytes = weather_cert_pem_end - weather_cert_pem_start,
+        .crt_bundle_attach = esp_crt_bundle_attach,
     };
 
     char weather_url[200] = {0};
@@ -197,6 +197,9 @@ static void __prism_weather_http_task(void *p_arg)
 
 static void __view_event_location_handler(void* handler_args, esp_event_base_t base, int32_t id, void* event_data)
 {
+    if (location_set) {
+        return;
+    }
     struct view_data_location *location_data = (struct view_data_location *)event_data;
     
     xSemaphoreTake(__g_data_mutex, portMAX_DELAY);
@@ -212,7 +215,7 @@ int prism_weather_init(void)
     __g_weather_http_com_sem = xSemaphoreCreateBinary();
     __g_data_mutex  =  xSemaphoreCreateMutex();
     
-    xTaskCreate(&__prism_weather_http_task, "__prism_weather_http_task", 1024 * 5, NULL, 10, NULL);
+    //xTaskCreate(&__prism_weather_http_task, "__prism_weather_http_task", 1024 * 5, NULL, 10, NULL);
 
     ESP_ERROR_CHECK(esp_event_handler_instance_register_with(view_event_handle, 
                                                         VIEW_EVENT_BASE, VIEW_EVENT_LOCATION, 

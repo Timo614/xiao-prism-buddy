@@ -6,6 +6,7 @@
 #include "prism_time.h"
 #include "json_helper.h"
 #include "view_data.h"
+#include "esp_crt_bundle.h"
 
 #include "lwip/err.h"
 #include "lwip/sockets.h"
@@ -162,8 +163,7 @@ exit:
 static int __cryptocurrency_get(void)
 {
     esp_tls_cfg_t cfg = {
-        .cacert_buf = (const unsigned char *) coingecko_cert_pem_start,
-        .cacert_bytes = coingecko_cert_pem_end - coingecko_cert_pem_start,
+        .crt_bundle_attach = esp_crt_bundle_attach,
     };
 
     char cryptocurrency_url[200] = {0};
@@ -219,15 +219,13 @@ static void __view_event_cryptocurrency_handler(void* handler_args, esp_event_ba
 {
     switch (id)
     {
-        case VIEW_EVENT_WIFI_ST: {
-            ESP_LOGI(TAG, "event: VIEW_EVENT_WIFI_ST");
-            struct view_data_wifi_st *p_st = ( struct view_data_wifi_st *)event_data;
-            if( p_st->is_connected) {
-                net_enabled = true;
-                xSemaphoreGive(__g_cryptocurrency_http_com_sem); 
-            } else {
-                net_enabled = false;
+        case VIEW_EVENT_TIME: {
+            if(net_enabled) {
+                return;
             }
+            ESP_LOGI(TAG, "event: VIEW_EVENT_TIME");
+            net_enabled = true;
+            xSemaphoreGive(__g_cryptocurrency_http_com_sem); 
             break;
         }
         default:
@@ -240,11 +238,10 @@ int prism_cryptocurrency_init(void)
     __g_cryptocurrency_http_com_sem = xSemaphoreCreateBinary();
     __g_data_mutex  =  xSemaphoreCreateMutex();
     
-    xTaskCreate(&__prism_cryptocurrency_http_task, "__prism_cryptocurrency_http_task", 1024 * 5, NULL, 10, NULL);
-;
+    //xTaskCreate(&__prism_cryptocurrency_http_task, "__prism_cryptocurrency_http_task", 1024 * 5, NULL, 10, NULL);
 
     ESP_ERROR_CHECK(esp_event_handler_instance_register_with(view_event_handle, 
-                                                        VIEW_EVENT_BASE, VIEW_EVENT_WIFI_ST, 
+                                                        VIEW_EVENT_BASE, VIEW_EVENT_TIME, 
                                                         __view_event_cryptocurrency_handler, NULL, NULL));                                                        
     return 0;
 }
