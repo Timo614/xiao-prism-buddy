@@ -37,7 +37,7 @@ extern "C" void app_main(void)
         .queue_size = 10,
         .task_name = "view_event_task",
         .task_priority = uxTaskPriorityGet(NULL),
-        .task_stack_size = 10240,
+        .task_stack_size = 4096,
         .task_core_id = tskNO_AFFINITY
     };
 
@@ -49,11 +49,11 @@ extern "C" void app_main(void)
     prism_view_init();
     lv_port_sem_give();
 
-    prism_model_init();
-    
     lv_port_sem_take();
     prism_controller_init();
     lv_port_sem_give();
+
+    prism_model_init();
 
     // static char buffer[128];    /* Make sure buffer is enough for `sprintf` */
     while (1) {

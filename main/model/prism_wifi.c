@@ -294,7 +294,7 @@ int prism_wifi_init(void)
 
     __wifi_model_init();
     
-    xTaskCreate(&__prism_wifi_task, "__prism_wifi_task", 1024 * 5, NULL, 10, NULL);
+    xTaskCreate(&__prism_wifi_task, "__prism_wifi_task", 1024 * 3, NULL, 10, NULL);
 
 
     ESP_ERROR_CHECK(esp_netif_init());

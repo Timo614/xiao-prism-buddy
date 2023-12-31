@@ -27,7 +27,7 @@ void screen_setting_24_hour_clock_init(void) {
     lv_obj_set_height( screen_setting_24_hour_clock_title, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_align( screen_setting_24_hour_clock_title, LV_ALIGN_TOP_MID );
     lv_obj_set_y( screen_setting_24_hour_clock_title, 50 );
-    lv_label_set_text(screen_setting_24_hour_clock_title,"12 Hour Time Format");
+    lv_label_set_text(screen_setting_24_hour_clock_title,"24 Hour Time Format");
     lv_obj_set_style_text_font(screen_setting_24_hour_clock_title, &lv_font_montserrat_20, LV_PART_MAIN| LV_STATE_DEFAULT);
 
     screen_setting_24_hour_clock_toggle = lv_switch_create(screen_setting_24_hour_clock);

@@ -23,6 +23,4 @@ void prism_view_init(void)
     screen_setting_24_hour_clock_init();
     screen_setting_brightness_init();
     screen_setting_init();
-
-    lv_disp_load_scr( screen_main);
 }

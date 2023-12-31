@@ -33,5 +33,4 @@ void screen_setting_init(void) {
     lv_obj_set_height( screen_setting_text, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_align( screen_setting_text, LV_ALIGN_CENTER );
     lv_label_set_text(screen_setting_text,"Grab to change setting screen\nRotate to toggle as needed");
-    lv_obj_set_style_text_font(screen_setting_text, &lv_font_montserrat_16, LV_PART_MAIN| LV_STATE_DEFAULT);
 }
