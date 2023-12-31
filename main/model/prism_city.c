@@ -20,7 +20,7 @@
 #include "mbedtls/error.h"
 #include "esp_crt_bundle.h"
 
-#define MAX_HTTP_OUTPUT_BUFFER 4096
+#define MAX_HTTP_OUTPUT_BUFFER 2048
 
 static const char *TAG = "city";
 static struct view_data_city __g_city_model;
@@ -217,9 +217,6 @@ static int __time_zone_data_parse(const char *p_str)
     
     return ret;
 }
-
-extern const char timeapi_root_cert_pem_start[] asm("_binary_timeapi_cert_pem_start");
-extern const char timeapi_root_cert_pem_end[]   asm("_binary_timeapi_cert_pem_end");
 
 static int https_get_request(esp_tls_cfg_t cfg, const char *WEB_SERVER_URL, const char *REQUEST)
 {

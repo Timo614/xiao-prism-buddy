@@ -22,7 +22,7 @@
 #include "mbedtls/error.h"
 #include "esp_crt_bundle.h"
 
-#define MAX_HTTP_OUTPUT_BUFFER 4096
+#define MAX_HTTP_OUTPUT_BUFFER 1024*3
 
 static const char *TAG = "weather";
 static struct view_weather_data __g_weather_data = {
@@ -76,9 +76,6 @@ static int __weather_data_parse(const char *p_str)
     
     return 0;
 }
-
-extern const char weather_cert_pem_start[] asm("_binary_open_meteo_com_pem_start");
-extern const char weather_cert_pem_end[]   asm("_binary_open_meteo_com_pem_end");
 
 static int https_get_request(esp_tls_cfg_t cfg, const char *WEB_SERVER_URL, const char *REQUEST)
 {
@@ -222,7 +219,7 @@ int prism_weather_init(void)
     __g_weather_http_com_sem = xSemaphoreCreateBinary();
     __g_data_mutex  =  xSemaphoreCreateMutex();
     
-    xTaskCreate(&__prism_weather_http_task, "__prism_weather_http_task", 1024 * 3, NULL, 10, NULL);
+    xTaskCreate(&__prism_weather_http_task, "__prism_weather_http_task", 1024 * 4, NULL, 10, NULL);
 
     ESP_ERROR_CHECK(esp_event_handler_instance_register_with(view_event_handle, 
                                                         VIEW_EVENT_BASE, VIEW_EVENT_LOCATION, 

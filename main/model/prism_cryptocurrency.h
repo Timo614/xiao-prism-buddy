@@ -8,7 +8,6 @@
 extern "C" {
 #endif
 
-struct view_cryptocurrency_data* get_cryptocurrency_data();
 int prism_cryptocurrency_init(void);
 
 #ifdef __cplusplus

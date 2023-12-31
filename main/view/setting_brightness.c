@@ -50,7 +50,7 @@ void screen_setting_brightness_init(void) {
     lv_img_set_src(screen_setting_brightness_icon_1, &ui_img_high_light_png);
     lv_obj_set_width( screen_setting_brightness_icon_1, LV_SIZE_CONTENT);  /// 22
     lv_obj_set_height( screen_setting_brightness_icon_1, LV_SIZE_CONTENT);   /// 22
-    lv_obj_set_x( screen_setting_brightness_icon_1, 0 );
+    lv_obj_set_x( screen_setting_brightness_icon_1, -10 );
     lv_obj_set_y( screen_setting_brightness_icon_1, 10 );
     lv_obj_set_align( screen_setting_brightness_icon_1, LV_ALIGN_RIGHT_MID );
     lv_obj_add_flag( screen_setting_brightness_icon_1, LV_OBJ_FLAG_ADV_HITTEST );   /// Flags
@@ -60,7 +60,7 @@ void screen_setting_brightness_init(void) {
     lv_img_set_src(screen_setting_brightness_icon_2, &ui_img_low_light_png);
     lv_obj_set_width( screen_setting_brightness_icon_2, LV_SIZE_CONTENT);  /// 18
     lv_obj_set_height( screen_setting_brightness_icon_2, LV_SIZE_CONTENT);   /// 18
-    lv_obj_set_x( screen_setting_brightness_icon_2, 0 );
+    lv_obj_set_x( screen_setting_brightness_icon_2, 10 );
     lv_obj_set_y( screen_setting_brightness_icon_2, 10 );
     lv_obj_set_align( screen_setting_brightness_icon_2, LV_ALIGN_LEFT_MID );
     lv_obj_add_flag( screen_setting_brightness_icon_2, LV_OBJ_FLAG_ADV_HITTEST );   /// Flags

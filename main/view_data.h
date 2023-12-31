@@ -47,8 +47,8 @@ struct view_data_city
 };
 
 struct view_cryptocurrency_data_item {
-    float value;
-    float value_24;
+    double value;
+    double value_24;
 };
 
 struct view_cryptocurrency_data {

@@ -50,10 +50,6 @@ static bool net_enabled = false;
 static char local_response_buffer[MAX_HTTP_OUTPUT_BUFFER] = {0};
 static SemaphoreHandle_t       __g_data_mutex;
 
-struct view_cryptocurrency_data* get_cryptocurrency_data() {
-    return &__g_cryptocurrency_data;
-}
-
 static int __cryptocurrency_data_parse(const char *p_str)
 {
     cJSON *root = cJSON_Parse(p_str);
@@ -93,9 +89,6 @@ static int __cryptocurrency_data_parse(const char *p_str)
     return 0;
 }
 
-extern const char coingecko_cert_pem_start[] asm("_binary_api_coingecko_com_pem_start");
-extern const char coingecko_cert_pem_end[]   asm("_binary_api_coingecko_com_pem_end");
-
 static int https_get_request(esp_tls_cfg_t cfg, const char *WEB_SERVER_URL, const char *REQUEST)
 {
     int ret, len;
@@ -103,60 +96,57 @@ static int https_get_request(esp_tls_cfg_t cfg, const char *WEB_SERVER_URL, cons
     esp_tls_t *tls = esp_tls_init();
     if (!tls) {
         ESP_LOGE(TAG, "Failed to allocate esp_tls handle!");
-        goto exit;
+        return -1;
     }
 
-    if (esp_tls_conn_http_new_sync(WEB_SERVER_URL, &cfg, tls) == 1) {
-        ESP_LOGI(TAG, "Connection established...");
-    } else {
+    // Establishing TLS connection
+    if (esp_tls_conn_http_new_sync(WEB_SERVER_URL, &cfg, tls) != 1) {
         ESP_LOGE(TAG, "Connection failed...");
-        goto cleanup;
+        esp_tls_conn_destroy(tls);
+        return -1;
     }
+    ESP_LOGI(TAG, "Connection established...");
 
+    // Sending the request
     size_t written_bytes = 0;
+    size_t request_len = strlen(REQUEST);
     do {
-        ret = esp_tls_conn_write(tls,
-                                 REQUEST + written_bytes,
-                                 strlen(REQUEST) - written_bytes);
-        if (ret >= 0) {
-            ESP_LOGI(TAG, "%d bytes written", ret);
-            written_bytes += ret;
-        } else if (ret != ESP_TLS_ERR_SSL_WANT_READ  && ret != ESP_TLS_ERR_SSL_WANT_WRITE) {
-            ESP_LOGE(TAG, "esp_tls_conn_write  returned: [0x%02X](%s)", ret, esp_err_to_name(ret));
-            goto cleanup;
+        ret = esp_tls_conn_write(tls, REQUEST + written_bytes, request_len - written_bytes);
+        if (ret < 0) {
+            ESP_LOGE(TAG, "esp_tls_conn_write returned: [0x%02X](%s)", ret, esp_err_to_name(ret));
+            esp_tls_conn_destroy(tls);
+            return -1;
         }
-    } while (written_bytes < strlen(REQUEST));
+        written_bytes += ret;
+    } while (written_bytes < request_len);
 
-    ESP_LOGI(TAG, "Reading HTTP response...");
+    ESP_LOGI(TAG, "Request sent, reading response...");
+
+    // Reading the response
     memset(local_response_buffer, 0x00, sizeof(local_response_buffer));
     recv_len = 0;
-    do {
+    while (1) {
         len = sizeof(local_response_buffer) - recv_len - 1;
-       
         ret = esp_tls_conn_read(tls, (char *)local_response_buffer + recv_len, len);
-
-        if (ret == ESP_TLS_ERR_SSL_WANT_WRITE  || ret == ESP_TLS_ERR_SSL_WANT_READ) {
-            continue;
-        } else if (ret < 0) {
-            recv_len = 0;
-            ESP_LOGE(TAG, "esp_tls_conn_read  returned [-0x%02X](%s)", -ret, esp_err_to_name(ret));
-            break;
+        if (ret < 0) {
+            ESP_LOGE(TAG, "esp_tls_conn_read returned [-0x%02X](%s)", -ret, esp_err_to_name(ret));
+            esp_tls_conn_destroy(tls);
+            return -1;
         } else if (ret == 0) {
-            ESP_LOGI(TAG, "connection closed");
+            ESP_LOGI(TAG, "Connection closed by peer");
             break;
         }
         recv_len += ret;
-        
-        break; 
-    } while (1);
 
-    if( recv_len > 0 ) {
-        printf( "%s", local_response_buffer);
+        // Check if the end of the response is reached
+        if (strstr((char *)local_response_buffer, "\r\n0\r\n")) {
+            break;
+        }
     }
-    
-cleanup:
+
+    ESP_LOGI(TAG, "Response received");
+
     esp_tls_conn_destroy(tls);
-exit:
     return recv_len;
 }
 
@@ -202,7 +192,7 @@ static void __prism_cryptocurrency_http_task(void *p_arg)
             int result = __cryptocurrency_get(); 
             xSemaphoreGive(__g_data_mutex);
             if( result > -1) {
-                esp_event_post_to(view_event_handle, VIEW_EVENT_BASE, VIEW_EVENT_CRYPTOCURRENCY, &__g_cryptocurrency_data, sizeof(struct view_cryptocurrency_data), portMAX_DELAY);
+                esp_event_post_to(view_event_handle, VIEW_EVENT_BASE, VIEW_EVENT_CRYPTOCURRENCY, &__g_cryptocurrency_data, sizeof(__g_cryptocurrency_data), portMAX_DELAY);
 
                 // After cryptocurrency has been set, delay calling API for 10 minutes to avoid rate limits
                 vTaskDelay(pdMS_TO_TICKS(10 * 60 * 1000));
@@ -219,12 +209,16 @@ static void __view_event_cryptocurrency_handler(void* handler_args, esp_event_ba
 {
     switch (id)
     {
-        case VIEW_EVENT_TIME: {
-            if(net_enabled) {
-                return;
-            }
-            ESP_LOGI(TAG, "event: VIEW_EVENT_TIME");
+        case VIEW_EVENT_WIFI_ST: {
+            ESP_LOGI(TAG, "event: VIEW_EVENT_WIFI_ST");
             net_enabled = true;
+            break;
+        }
+        case VIEW_EVENT_WEATHER: {
+            ESP_LOGI(TAG, "event: VIEW_EVENT_WEATHER");
+            if(!net_enabled) {
+                break;
+            }
             xSemaphoreGive(__g_cryptocurrency_http_com_sem); 
             break;
         }
@@ -238,10 +232,13 @@ int prism_cryptocurrency_init(void)
     __g_cryptocurrency_http_com_sem = xSemaphoreCreateBinary();
     __g_data_mutex  =  xSemaphoreCreateMutex();
     
-    //xTaskCreate(&__prism_cryptocurrency_http_task, "__prism_cryptocurrency_http_task", 1024 * 3, NULL, 10, NULL);
+    xTaskCreate(&__prism_cryptocurrency_http_task, "__prism_cryptocurrency_http_task", 1024 * 6, NULL, 10, NULL);
 
     ESP_ERROR_CHECK(esp_event_handler_instance_register_with(view_event_handle, 
-                                                        VIEW_EVENT_BASE, VIEW_EVENT_TIME, 
+                                                        VIEW_EVENT_BASE, VIEW_EVENT_WIFI_ST, 
+                                                        __view_event_cryptocurrency_handler, NULL, NULL));     
+    ESP_ERROR_CHECK(esp_event_handler_instance_register_with(view_event_handle, 
+                                                        VIEW_EVENT_BASE, VIEW_EVENT_WEATHER, 
                                                         __view_event_cryptocurrency_handler, NULL, NULL));                                                        
     return 0;
 }

@@ -40,21 +40,40 @@ static struct view_weather_data __g_weather_data = {
     .temperature = 0.0,
 };
 
+static struct view_cryptocurrency_data __g_cryptocurrency_data = {
+    .bitcoin = {
+        .value = 0.0,
+        .value_24 = 0.0
+    },
+    .ethereum = {
+        .value = 0.0,
+        .value_24 = 0.0
+    },
+    .ripple = {
+        .value = 0.0,
+        .value_24 = 0.0
+    },
+    .dogecoin = {
+        .value = 0.0,
+        .value_24 = 0.0
+    }
+};
+
 static bool __g_time_format_24;
 
 static const char *TAG = "controller";
 
 static const void *__g_crypto_image_sources[] = {
     &ui_coins_btc,
-    &ui_coins_doge,
     &ui_coins_eth,
+    &ui_coins_doge,
     &ui_coins_xrp
 };
 
 static const char *__g_crypto_descriptions[] = {
     "Bitcoin",
-    "Dogecoin",
     "Ethereum",
+    "Dogecoin",
     "Ripple",
 };
 
@@ -85,39 +104,30 @@ void render_cryptocurrency(int index) {
     ESP_LOGI(TAG, "rendering cryptocurrency %d", index);
     int current_page = index + 1; 
     
-    view_cryptocurrency_data* cryptocurrency_data = get_cryptocurrency_data();
-    float value, value_24;
+    double value, value_24;
     switch (index) {
         default:
         case 0: {
-            value = cryptocurrency_data->bitcoin.value;
-            value_24 = cryptocurrency_data->bitcoin.value_24;
+            value = __g_cryptocurrency_data.bitcoin.value;
+            value_24 = __g_cryptocurrency_data.bitcoin.value_24;
             break;
         }
         case 1: {
-            value = cryptocurrency_data->ethereum.value;
-            value_24 = cryptocurrency_data->ethereum.value_24;
+            value = __g_cryptocurrency_data.ethereum.value;
+            value_24 = __g_cryptocurrency_data.ethereum.value_24;
             break;
         }
         case 2: {
-            value = cryptocurrency_data->dogecoin.value;
-            value_24 = cryptocurrency_data->dogecoin.value_24;
+            value = __g_cryptocurrency_data.dogecoin.value;
+            value_24 = __g_cryptocurrency_data.dogecoin.value_24;
             break;
         }
         case 3: {
-            value = cryptocurrency_data->ripple.value;
-            value_24 = cryptocurrency_data->ripple.value_24;
+            value = __g_cryptocurrency_data.ripple.value;
+            value_24 = __g_cryptocurrency_data.ripple.value_24;
             break;
         }
     }
-    
-    float change_percent;
-    if (value_24 == 0.0) {
-        change_percent = 0.0;
-    } else {
-        change_percent = (value - value_24) / value_24 * 100.0;
-    }
-    change_percent = round(change_percent * 100) / 100;
 
     lv_obj_t * cryptocurrency = lv_obj_create(NULL);
     lv_obj_clear_flag( cryptocurrency, LV_OBJ_FLAG_SCROLLABLE );
@@ -125,26 +135,41 @@ void render_cryptocurrency(int index) {
     lv_obj_t * cryptocurrency_text = lv_label_create(cryptocurrency);
     lv_obj_set_width( cryptocurrency_text, LV_SIZE_CONTENT);  /// 1
     lv_obj_set_height( cryptocurrency_text, LV_SIZE_CONTENT);   /// 1
-    lv_obj_set_align( cryptocurrency_text, LV_ALIGN_BOTTOM_MID );
-    lv_obj_set_y( cryptocurrency_text, -45 );
-    lv_obj_set_style_text_font(cryptocurrency_text, &lv_font_montserrat_20, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_align( cryptocurrency_text, LV_ALIGN_TOP_LEFT );
+    lv_obj_set_y( cryptocurrency_text, 40 );
+    lv_obj_set_x( cryptocurrency_text, 40 ); 
+    lv_obj_set_style_text_font(cryptocurrency_text, &lv_font_montserrat_30, LV_PART_MAIN| LV_STATE_DEFAULT);
     lv_label_set_text(cryptocurrency_text, __g_crypto_descriptions[index]);
 
     lv_obj_t * cryptocurrency_value = lv_label_create(cryptocurrency);
     lv_obj_set_width( cryptocurrency_value, LV_SIZE_CONTENT);  /// 1
     lv_obj_set_height( cryptocurrency_value, LV_SIZE_CONTENT);   /// 1
-    lv_obj_set_align( cryptocurrency_value, LV_ALIGN_CENTER );    
-    lv_obj_set_y( cryptocurrency_value, 40 );    
-    lv_obj_set_x( cryptocurrency_value, -40 );   
-    lv_label_set_text_fmt(cryptocurrency_value, "%s%0.2f", CURRENCY_SYMBOL, value);
+    lv_obj_set_align( cryptocurrency_value, LV_ALIGN_LEFT_MID );    
+    lv_obj_set_y( cryptocurrency_value, 10 );   
+    lv_obj_set_x( cryptocurrency_value, 40 ); 
+    lv_label_set_recolor(cryptocurrency_value, true); 
+    if (value_24 < 0) {
+        lv_label_set_text_fmt(cryptocurrency_value, "%s#ff0000 %0.2f#", CURRENCY_SYMBOL, value);
+        
+    } else {
+        lv_label_set_text_fmt(cryptocurrency_value, "%s#00ff00 %0.2f#", CURRENCY_SYMBOL, value);
+    }
+    lv_obj_set_style_text_font(cryptocurrency_value, &lv_font_montserrat_26, LV_PART_MAIN| LV_STATE_DEFAULT);
 
-    lv_obj_t * cryptocurrency_change_percent = lv_label_create(cryptocurrency);
-    lv_obj_set_width( cryptocurrency_change_percent, LV_SIZE_CONTENT);  /// 1
-    lv_obj_set_height( cryptocurrency_change_percent, LV_SIZE_CONTENT);   /// 1
-    lv_obj_set_align( cryptocurrency_change_percent, LV_ALIGN_CENTER );      
-    lv_obj_set_x( cryptocurrency_change_percent, 40 );   
-    lv_obj_set_y( cryptocurrency_change_percent, 40 );
-    lv_label_set_text_fmt(cryptocurrency_change_percent, "%0.2f%%", change_percent);
+    lv_obj_t * cryptocurrency_change_24_hours = lv_label_create(cryptocurrency);
+    lv_obj_set_width( cryptocurrency_change_24_hours, LV_SIZE_CONTENT);  /// 1
+    lv_obj_set_height( cryptocurrency_change_24_hours, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_align( cryptocurrency_change_24_hours, LV_ALIGN_RIGHT_MID );      
+    lv_label_set_recolor(cryptocurrency_change_24_hours, true); 
+    lv_obj_set_x( cryptocurrency_change_24_hours, -40 );   
+    lv_obj_set_y( cryptocurrency_change_24_hours, 30 );
+    lv_obj_set_style_text_font(cryptocurrency_change_24_hours, &lv_font_montserrat_18, LV_PART_MAIN| LV_STATE_DEFAULT);
+    if (value_24 < 0) {
+        lv_label_set_text_fmt(cryptocurrency_change_24_hours, "24H #ff0000 (%0.2f)#", value_24 * -1.0);
+        
+    } else {
+        lv_label_set_text_fmt(cryptocurrency_change_24_hours, "24H #00ff00 %0.2f#", value_24 * 1.0);
+    }
 
     lv_obj_t * cryptocurrency_page = lv_label_create(cryptocurrency);
     lv_obj_set_width( cryptocurrency_page, LV_SIZE_CONTENT);  /// 1
@@ -157,8 +182,9 @@ void render_cryptocurrency(int index) {
     lv_obj_t * cryptocurrency_image = lv_img_create(cryptocurrency);
     lv_obj_set_width( cryptocurrency_image, LV_SIZE_CONTENT);
     lv_obj_set_height( cryptocurrency_image, LV_SIZE_CONTENT); 
-    lv_obj_set_align( cryptocurrency_image, LV_ALIGN_TOP_MID );
-    lv_obj_set_y( cryptocurrency_image, 15 );
+    lv_obj_set_align( cryptocurrency_image, LV_ALIGN_TOP_RIGHT );
+    lv_obj_set_y( cryptocurrency_image, 40 );
+    lv_obj_set_x( cryptocurrency_image, -40 );
     lv_img_set_src(cryptocurrency_image, __g_crypto_image_sources[index]);
 
     screen_cryptocurrency = cryptocurrency;
@@ -189,7 +215,7 @@ void render_main() {
     lv_obj_set_x( main_time, 0 );
     lv_obj_set_align( main_time, LV_ALIGN_BOTTOM_MID );
     lv_obj_clear_flag( main_time, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
-    lv_obj_set_style_text_font(main_time, &lv_font_montserrat_40, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(main_time, &lv_font_montserrat_48, LV_PART_MAIN| LV_STATE_DEFAULT);
 
     lv_obj_t * main_city = lv_label_create(main);
     lv_obj_set_y( main_city, 30 );
@@ -525,6 +551,16 @@ static void __view_event_handler(void* handler_args, esp_event_base_t base, int3
         }
         case VIEW_EVENT_CRYPTOCURRENCY: {
             ESP_LOGI(TAG, "event: VIEW_EVENT_CRYPTOCURRENCY");
+            view_cryptocurrency_data * cryptocurrency_data = ( view_cryptocurrency_data* )event_data;
+            __g_cryptocurrency_data.bitcoin.value = cryptocurrency_data->bitcoin.value;
+            __g_cryptocurrency_data.bitcoin.value_24 = cryptocurrency_data->bitcoin.value_24;
+            __g_cryptocurrency_data.ethereum.value = cryptocurrency_data->ethereum.value;
+            __g_cryptocurrency_data.ethereum.value_24 = cryptocurrency_data->ethereum.value_24;
+            __g_cryptocurrency_data.ripple.value = cryptocurrency_data->ripple.value;
+            __g_cryptocurrency_data.ripple.value_24 = cryptocurrency_data->ripple.value_24;
+            __g_cryptocurrency_data.dogecoin.value = cryptocurrency_data->dogecoin.value;
+            __g_cryptocurrency_data.dogecoin.value_24 = cryptocurrency_data->dogecoin.value_24;
+                        
             if (current_screen == screen_cryptocurrency) {
                 lv_obj_t * old_screen = screen_cryptocurrency;        
                 lv_port_sem_take();
@@ -550,20 +586,18 @@ static void __view_event_handler(void* handler_args, esp_event_base_t base, int3
             __g_weather_data.temperature = weather_data->temperature;
             __g_weather_data.humidity = weather_data->humidity;
             
-            if (old_weather != weather_data->weather) {
-                if (current_screen == screen_main) {
-                    lv_obj_t * old_screen = screen_main;
-                    lv_port_sem_take();
-                    lv_obj_clean(lv_scr_act());
-                    lv_port_sem_give();
-                    vTaskDelay(pdMS_TO_TICKS(500));
-                    
-                    lv_port_sem_take();
-                    render_main();
-                    _ui_screen_change( screen_main);
-                    lv_obj_del(old_screen);
-                    lv_port_sem_give();
-                }
+            if (current_screen == screen_main) {
+                lv_obj_t * old_screen = screen_main;
+                lv_port_sem_take();
+                lv_obj_clean(lv_scr_act());
+                lv_port_sem_give();
+                vTaskDelay(pdMS_TO_TICKS(500));
+                
+                lv_port_sem_take();
+                render_main();
+                _ui_screen_change( screen_main);
+                lv_obj_del(old_screen);
+                lv_port_sem_give();
             }
             break;
         }
