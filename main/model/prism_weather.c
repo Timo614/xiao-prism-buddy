@@ -25,7 +25,11 @@
 #define MAX_HTTP_OUTPUT_BUFFER 4096
 
 static const char *TAG = "weather";
-static weather_type_t __g_weather;
+static struct view_weather_data __g_weather_data = {
+    .temperature = 0.0,
+    .humidity = 0,
+    .weather = CLEAR_DAY,
+};
 static SemaphoreHandle_t   __g_weather_http_com_sem;
 static bool location_set = false;
 static char local_response_buffer[MAX_HTTP_OUTPUT_BUFFER] = {0};
@@ -40,12 +44,12 @@ static int __weather_data_parse(const char *p_str)
         return -1;
     }
 
-    double temperature;
     int rain, snow, cloud_cover;
     bool is_day;
     cJSON *cjson_item = cJSON_GetObjectItem(root, "current");
     if (cjson_item != NULL) {
-        parseJsonDouble(TAG, cjson_item, "temperature_2m", &temperature);
+        parseJsonDouble(TAG, cjson_item, "temperature_2m", &__g_weather_data.temperature);
+        parseJsonInt(TAG, cjson_item, "relative_humidity_2m", &__g_weather_data.humidity);
         parseJsonInt(TAG, cjson_item, "rain", &rain);
         parseJsonInt(TAG, cjson_item, "snowfall", &snow);
         parseJsonInt(TAG, cjson_item, "cloud_cover", &cloud_cover);
@@ -54,18 +58,18 @@ static int __weather_data_parse(const char *p_str)
 
     if (rain > 0 || snow > 0) {
         if (snow > 0 && rain >= 0.25 * (rain + snow)) {
-            __g_weather = SLEET;
+            __g_weather_data.weather = SLEET;
         } else if (snow > 0) {
-            __g_weather = SNOWY;
+            __g_weather_data.weather = SNOWY;
         } else {
-            __g_weather = RAINY;
+            __g_weather_data.weather = RAINY;
         }
     } else if (cloud_cover >= 37 && cloud_cover <= 62) {
-        __g_weather = is_day ? PARTLY_CLOUDY_DAY : PARTLY_CLOUDY_NIGHT;
+        __g_weather_data.weather = is_day ? PARTLY_CLOUDY_DAY : PARTLY_CLOUDY_NIGHT;
     } else if (cloud_cover > 63) {
-        __g_weather = CLOUDY;
+        __g_weather_data.weather = CLOUDY;
     } else {
-        __g_weather = is_day ? CLEAR_DAY : CLEAR_NIGHT;
+        __g_weather_data.weather = is_day ? CLEAR_DAY : CLEAR_NIGHT;
     }
 
     cJSON_Delete(root);
@@ -182,9 +186,12 @@ static void __prism_weather_http_task(void *p_arg)
             int result = __weather_get(__location_data.latitude, __location_data.longitude); 
             xSemaphoreGive(__g_data_mutex);
             if( result >= 0) {
-                esp_event_post_to(view_event_handle, VIEW_EVENT_BASE, VIEW_EVENT_WEATHER, &__g_weather, sizeof(weather_type_t), portMAX_DELAY);
+                
+                ESP_LOGI(TAG, "event: temperature %2.2f", __g_weather_data.temperature);
+                ESP_LOGI(TAG, "event: humidity %d", __g_weather_data.humidity);
+                esp_event_post_to(view_event_handle, VIEW_EVENT_BASE, VIEW_EVENT_WEATHER, &__g_weather_data, sizeof(__g_weather_data), portMAX_DELAY);
 
-                // After weather has been set, delay calling API for 10 minutes to avoid rate limits
+                // After weather has been set, delay calling API for 10 minutes to avoid rate limitsVIEW_EVENT_WEATHER
                 vTaskDelay(pdMS_TO_TICKS(10 * 60 * 1000));
             }
         }
@@ -215,7 +222,7 @@ int prism_weather_init(void)
     __g_weather_http_com_sem = xSemaphoreCreateBinary();
     __g_data_mutex  =  xSemaphoreCreateMutex();
     
-    //xTaskCreate(&__prism_weather_http_task, "__prism_weather_http_task", 1024 * 5, NULL, 10, NULL);
+    xTaskCreate(&__prism_weather_http_task, "__prism_weather_http_task", 1024 * 3, NULL, 10, NULL);
 
     ESP_ERROR_CHECK(esp_event_handler_instance_register_with(view_event_handle, 
                                                         VIEW_EVENT_BASE, VIEW_EVENT_LOCATION, 

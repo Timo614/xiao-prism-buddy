@@ -69,6 +69,12 @@ typedef enum {
     SNOWY
 } weather_type_t;
 
+struct view_weather_data {
+    weather_type_t weather;
+    int humidity;
+    double temperature;
+};
+
 typedef enum {
     GESTURE_NONE = 0,
     GESTURE_GRAB,

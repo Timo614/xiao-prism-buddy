@@ -238,7 +238,7 @@ int prism_cryptocurrency_init(void)
     __g_cryptocurrency_http_com_sem = xSemaphoreCreateBinary();
     __g_data_mutex  =  xSemaphoreCreateMutex();
     
-    //xTaskCreate(&__prism_cryptocurrency_http_task, "__prism_cryptocurrency_http_task", 1024 * 5, NULL, 10, NULL);
+    //xTaskCreate(&__prism_cryptocurrency_http_task, "__prism_cryptocurrency_http_task", 1024 * 3, NULL, 10, NULL);
 
     ESP_ERROR_CHECK(esp_event_handler_instance_register_with(view_event_handle, 
                                                         VIEW_EVENT_BASE, VIEW_EVENT_TIME, 

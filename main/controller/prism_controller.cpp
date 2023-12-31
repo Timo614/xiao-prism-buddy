@@ -32,7 +32,14 @@ static const int __g_image_length = 2;
 static lv_obj_t *last_setting_screen;
 static int __g_selected_cryptocurrency;
 static int __g_selected_image;
-static weather_type_t __g_weather;
+static char *__g_city;
+
+static struct view_weather_data __g_weather_data = {
+    .weather = CLEAR_DAY,
+    .humidity = 0,
+    .temperature = 0.0,
+};
+
 static bool __g_time_format_24;
 
 static const char *TAG = "controller";
@@ -182,17 +189,45 @@ void render_main() {
     lv_obj_set_x( main_time, 0 );
     lv_obj_set_align( main_time, LV_ALIGN_BOTTOM_MID );
     lv_obj_clear_flag( main_time, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
-    lv_obj_set_style_text_font(main_time, &lv_font_montserrat_26, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(main_time, &lv_font_montserrat_40, LV_PART_MAIN| LV_STATE_DEFAULT);
 
-    ESP_LOGI(TAG, "rendering weather %d", __g_weather);
-    
+    lv_obj_t * main_city = lv_label_create(main);
+    lv_obj_set_y( main_city, 30 );
+    lv_obj_set_x( main_city, 20 );
+    lv_obj_set_align( main_city, LV_ALIGN_TOP_LEFT );
+    lv_obj_clear_flag( main_city, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+    lv_obj_set_style_text_font(main_city, &lv_font_montserrat_18, LV_PART_MAIN| LV_STATE_DEFAULT);
+
+    if (__g_city == NULL) {
+        lv_label_set_text(main_city, "The World");
+    } else {
+        lv_label_set_text(main_city, __g_city);
+    }
+
+    lv_obj_t * main_humidity = lv_label_create(main);
+    lv_obj_set_y( main_humidity, 60 );
+    lv_obj_set_x( main_humidity, 120 );
+    lv_obj_set_align( main_humidity, LV_ALIGN_TOP_LEFT );
+    lv_obj_clear_flag( main_humidity, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+    lv_label_set_text_fmt(main_humidity, "%d %%", __g_weather_data.humidity);
+    lv_obj_set_style_text_font(main_humidity, &lv_font_montserrat_26, LV_PART_MAIN| LV_STATE_DEFAULT);
+
+    lv_obj_t * main_temperature = lv_label_create(main);
+    lv_obj_set_y( main_temperature, 60 );
+    lv_obj_set_x( main_temperature, 20 );
+    lv_obj_set_align( main_temperature, LV_ALIGN_TOP_LEFT );
+    lv_obj_clear_flag( main_temperature, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+    lv_label_set_text_fmt(main_temperature, "%2.1f C", __g_weather_data.temperature);
+    lv_obj_set_style_text_font(main_temperature, &lv_font_montserrat_26, LV_PART_MAIN| LV_STATE_DEFAULT);
+
+    ESP_LOGI(TAG, "rendering weather %d", __g_weather_data.weather);    
     lv_obj_t * main_weather = lv_gif_create(main);
     lv_obj_set_width( main_weather, LV_SIZE_CONTENT);
     lv_obj_set_height( main_weather, LV_SIZE_CONTENT); 
-    lv_obj_set_x( main_weather, 10 );
+    lv_obj_set_x( main_weather, -10 );
     lv_obj_set_y( main_weather, 10 );
-    lv_obj_set_align( main_weather, LV_ALIGN_TOP_LEFT );
-    switch(__g_weather) {
+    lv_obj_set_align( main_weather, LV_ALIGN_TOP_RIGHT );
+    switch(__g_weather_data.weather) {
         case CLOUDY: {
             lv_gif_set_src(main_weather, &ui_weather_cloudy);
             break;
@@ -295,12 +330,6 @@ void event_wifi_status(void * event_data) {
     lv_img_set_src(screen_setting_wifi , (void *)p_src);
 }
 
-void cryptocurrency_update(void * event_data) {
-    if (current_screen == screen_cryptocurrency) {
-        render_cryptocurrency(__g_selected_cryptocurrency);
-    }
-}
-
 void sensor_data_update(void * event_data) {
     struct gesture_event_t  *p_data = (struct gesture_event_t *) event_data;
 
@@ -337,6 +366,9 @@ void sensor_data_update(void * event_data) {
                 __g_selected_image %= __g_image_length;
             }
             lv_obj_t * old_screen = screen_browser;
+            lv_obj_clean(lv_scr_act());
+            vTaskDelay(pdMS_TO_TICKS(500));
+
             render_browser_image(__g_selected_image);
             _ui_screen_change( screen_browser);
             lv_obj_del(old_screen);
@@ -428,20 +460,6 @@ void sensor_data_update(void * event_data) {
     }
 }
 
-void weather_update(void * event_data) {
-    weather_type_t weather = *( weather_type_t* )event_data;
-    if (weather != __g_weather) {
-        __g_weather = weather;
-
-        if (current_screen == screen_main) {
-            lv_obj_t * old_screen = screen_main;
-            render_main();
-            _ui_screen_change( screen_main);
-            lv_obj_del(old_screen);
-        }
-    }
-}
-
 void event_time_config_update(void * event_data) {
     struct view_data_time_cfg *p_cfg = ( struct view_data_time_cfg *)event_data;
     
@@ -469,6 +487,32 @@ static void __view_event_handler(void* handler_args, esp_event_base_t base, int3
             }
             break;
         }
+        case VIEW_EVENT_CITY: {
+            char *p_data = (char *)event_data;
+
+            if (p_data == NULL) {
+                break;
+            }
+
+            if (__g_city != NULL) {
+                free(__g_city);
+            }
+
+            __g_city = (char *)malloc(strlen(p_data) + 1); 
+            if (__g_city == NULL) {
+                break;
+            }
+
+            strcpy(__g_city, p_data);
+
+            if (current_screen == screen_main) {
+                lv_obj_t *old_screen = screen_main;
+                render_main();
+                _ui_screen_change(screen_main);
+                lv_obj_del(old_screen);
+            }
+            break;
+        }
         case VIEW_EVENT_DISPLAY_CFG: {
             ESP_LOGI(TAG, "event: VIEW_EVENT_DISPLAY_CFG");
             lv_async_call(event_display_config, event_data);
@@ -481,12 +525,46 @@ static void __view_event_handler(void* handler_args, esp_event_base_t base, int3
         }
         case VIEW_EVENT_CRYPTOCURRENCY: {
             ESP_LOGI(TAG, "event: VIEW_EVENT_CRYPTOCURRENCY");
-            lv_async_call(cryptocurrency_update, event_data);
+            if (current_screen == screen_cryptocurrency) {
+                lv_obj_t * old_screen = screen_cryptocurrency;        
+                lv_port_sem_take();
+                lv_obj_clean(lv_scr_act());
+                lv_port_sem_give();
+                vTaskDelay(pdMS_TO_TICKS(500));
+                
+                render_cryptocurrency(__g_selected_cryptocurrency);
+                    
+                lv_port_sem_take();
+                render_main();
+                _ui_screen_change( screen_cryptocurrency);
+                lv_obj_del(old_screen);
+                lv_port_sem_give();
+            }
             break;
         }
         case VIEW_EVENT_WEATHER: {
             ESP_LOGI(TAG, "event: VIEW_EVENT_WEATHER");
-            lv_async_call(weather_update, event_data);
+            view_weather_data * weather_data = ( view_weather_data* )event_data;
+            weather_type_t old_weather = __g_weather_data.weather;
+            __g_weather_data.weather = weather_data->weather;
+            __g_weather_data.temperature = weather_data->temperature;
+            __g_weather_data.humidity = weather_data->humidity;
+            
+            if (old_weather != weather_data->weather) {
+                if (current_screen == screen_main) {
+                    lv_obj_t * old_screen = screen_main;
+                    lv_port_sem_take();
+                    lv_obj_clean(lv_scr_act());
+                    lv_port_sem_give();
+                    vTaskDelay(pdMS_TO_TICKS(500));
+                    
+                    lv_port_sem_take();
+                    render_main();
+                    _ui_screen_change( screen_main);
+                    lv_obj_del(old_screen);
+                    lv_port_sem_give();
+                }
+            }
             break;
         }
         case VIEW_EVENT_TIME_CFG_UPDATE: {
@@ -510,7 +588,6 @@ int prism_controller_init(void)
 {   
     __g_selected_cryptocurrency = 0;
     __g_selected_image = 0;
-    __g_weather = CLEAR_DAY;
     __g_time_format_24 = false;
     render_main();
     lv_scr_load( screen_main);
