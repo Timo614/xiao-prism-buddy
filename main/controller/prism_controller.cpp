@@ -145,7 +145,7 @@ void render_cryptocurrency(int index) {
     lv_obj_set_width( cryptocurrency_value, LV_SIZE_CONTENT);  /// 1
     lv_obj_set_height( cryptocurrency_value, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_align( cryptocurrency_value, LV_ALIGN_LEFT_MID );    
-    lv_obj_set_y( cryptocurrency_value, 10 );   
+    lv_obj_set_y( cryptocurrency_value, -20 );   
     lv_obj_set_x( cryptocurrency_value, 40 ); 
     lv_label_set_recolor(cryptocurrency_value, true); 
     if (value_24 < 0) {
