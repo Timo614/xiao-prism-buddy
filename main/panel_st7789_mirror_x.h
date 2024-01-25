@@ -10,8 +10,8 @@ struct Panel_ST7789_Mirror_X  : public lgfx::Panel_ST7789
                                          0,
         MAD_MV|MAD_MX|MAD_MH              ,
                MAD_MX|MAD_MH|MAD_MY|MAD_ML,
-        // MAD_MY | MAD_MX added here for proper prism rotation
-        MAD_MV|       MAD_MY|MAD_MX|MAD_ML,
+        // Adjusted here for proper prism rotation
+        MAD_MV|       MAD_ML,
                              MAD_MY|MAD_ML,
         MAD_MV                            ,
                MAD_MX|MAD_MH              ,
