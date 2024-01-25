@@ -163,7 +163,7 @@ void render_cryptocurrency(int index) {
     lv_label_set_recolor(cryptocurrency_change_24_hours, true); 
     lv_obj_set_x( cryptocurrency_change_24_hours, -40 );   
     lv_obj_set_y( cryptocurrency_change_24_hours, 30 );
-    lv_obj_set_style_text_font(cryptocurrency_change_24_hours, &lv_font_montserrat_18, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(cryptocurrency_change_24_hours, &lv_font_montserrat_20, LV_PART_MAIN| LV_STATE_DEFAULT);
     if (value_24 < 0) {
         lv_label_set_text_fmt(cryptocurrency_change_24_hours, "24H #ff0000 (%0.2f)#", value_24 * -1.0);
         
@@ -176,7 +176,7 @@ void render_cryptocurrency(int index) {
     lv_obj_set_height( cryptocurrency_page, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_y( cryptocurrency_page, -20 );
     lv_obj_set_align( cryptocurrency_page, LV_ALIGN_BOTTOM_MID );
-    lv_obj_set_style_text_font(cryptocurrency_page, &lv_font_montserrat_18, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(cryptocurrency_page, &lv_font_montserrat_20, LV_PART_MAIN| LV_STATE_DEFAULT);
     lv_label_set_text_fmt(cryptocurrency_page, "%d / %d", current_page, __g_cryptocurrency_length);
 
     lv_obj_t * cryptocurrency_image = lv_img_create(cryptocurrency);
@@ -222,7 +222,7 @@ void render_main() {
     lv_obj_set_x( main_city, 20 );
     lv_obj_set_align( main_city, LV_ALIGN_TOP_LEFT );
     lv_obj_clear_flag( main_city, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
-    lv_obj_set_style_text_font(main_city, &lv_font_montserrat_18, LV_PART_MAIN| LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(main_city, &lv_font_montserrat_20, LV_PART_MAIN| LV_STATE_DEFAULT);
 
     if (__g_city == NULL) {
         lv_label_set_text(main_city, "The World");

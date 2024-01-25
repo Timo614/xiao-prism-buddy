@@ -190,11 +190,7 @@ static void __ping_end(esp_ping_handle_t hdl, void *args)
         loss = 100;
     }
      
-    if (IP_IS_V4(&target_addr)) {
-        printf("\n--- %s ping statistics ---\n", inet_ntoa(*ip_2_ip4(&target_addr)));
-    } else {
-        printf("\n--- %s ping statistics ---\n", inet6_ntoa(*ip_2_ip6(&target_addr)));
-    }
+    printf("\n--- %s ping statistics ---\n", inet_ntoa(*ip_2_ip4(&target_addr)));
     esp_ping_delete_session(hdl);
 
     struct view_data_wifi_st st;
