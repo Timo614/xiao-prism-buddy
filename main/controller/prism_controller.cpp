@@ -86,6 +86,8 @@ void update_time(void);
 
 /**********************  display cfg **********************/
 void __save_settings(void) {
+    
+    ESP_LOGI(TAG, "saving settings");
     struct view_data_display data_config;
     data_config.brightness = lv_slider_get_value(screen_setting_brightness_slider);
     esp_event_post_to(view_event_handle, VIEW_EVENT_BASE, VIEW_EVENT_DISPLAY_CFG_APPLY, &data_config, sizeof(data_config), portMAX_DELAY);
@@ -325,11 +327,6 @@ void update_time(void)
     lv_label_set_text_fmt(screen_main_time, "%02d:%02d", hour, timeinfo.tm_min);
 }
 
-void event_display_config(void * event_data) {
-    struct view_data_display *p_cfg = ( struct view_data_display *)event_data;
-    lv_slider_set_value(screen_setting_brightness_slider, p_cfg->brightness, LV_ANIM_OFF);
-}
-
 void event_wifi_status(void * event_data) {
     struct view_data_wifi_st *p_st = ( struct view_data_wifi_st *)event_data;
     
@@ -486,16 +483,6 @@ void sensor_data_update(void * event_data) {
     }
 }
 
-void event_time_config_update(void * event_data) {
-    struct view_data_time_cfg *p_cfg = ( struct view_data_time_cfg *)event_data;
-    
-    if(  p_cfg->time_format_24 ) {
-        lv_obj_clear_state( screen_setting_24_hour_clock_toggle, LV_STATE_CHECKED);
-    } else {
-        lv_obj_add_state( screen_setting_24_hour_clock_toggle, LV_STATE_CHECKED);
-    }      
-}
-
 static void __view_event_handler(void* handler_args, esp_event_base_t base, int32_t id, void* event_data)
 {
     switch (id)
@@ -541,7 +528,9 @@ static void __view_event_handler(void* handler_args, esp_event_base_t base, int3
         }
         case VIEW_EVENT_DISPLAY_CFG: {
             ESP_LOGI(TAG, "event: VIEW_EVENT_DISPLAY_CFG");
-            lv_async_call(event_display_config, event_data);
+            
+            struct view_data_display *p_cfg = ( struct view_data_display *)event_data;
+            lv_slider_set_value(screen_setting_brightness_slider, p_cfg->brightness, LV_ANIM_OFF);
             break;
         }
         case VIEW_EVENT_WIFI_ST: {
@@ -603,7 +592,13 @@ static void __view_event_handler(void* handler_args, esp_event_base_t base, int3
         }
         case VIEW_EVENT_TIME_CFG_UPDATE: {
             ESP_LOGI(TAG, "event: VIEW_EVENT_TIME_CFG_UPDATE");
-            lv_async_call(event_time_config_update, event_data);    
+            struct view_data_time_cfg *p_cfg = ( struct view_data_time_cfg *)event_data;
+    
+            if(  p_cfg->time_format_24 ) {
+                lv_obj_add_state( screen_setting_24_hour_clock_toggle, LV_STATE_CHECKED);
+            } else {
+                lv_obj_clear_state( screen_setting_24_hour_clock_toggle, LV_STATE_CHECKED);
+            }     
             break;
         }
         case VIEW_EVENT_SENSOR_DATA: {

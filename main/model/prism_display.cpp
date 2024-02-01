@@ -70,7 +70,7 @@ static bool __display_st_get(void)
 
 static void __display_cfg_print(struct view_data_display *p_data )
 {
-    ESP_LOGI(TAG, "brightnes:%d",p_data->brightness );
+    ESP_LOGI(TAG, "brightness:%d",p_data->brightness );
 }
 
 static void __lcd_bl_set(int brightness )
@@ -152,7 +152,7 @@ static void __view_event_handler(void* handler_args, esp_event_base_t base, int3
             int *p_brightness= (int *)event_data;
             struct view_data_display cfg;
 
-            ESP_LOGI(TAG, "event: VIEW_EVENT_BRIGHTNESS_UPDATE, brightnes:%d", *p_brightness);
+            ESP_LOGI(TAG, "event: VIEW_EVENT_BRIGHTNESS_UPDATE, brightness:%d", *p_brightness);
          
             __lcd_bl_set(*p_brightness);
            
@@ -193,6 +193,9 @@ int prism_display_init(void)
 
     esp_event_post_to(view_event_handle, VIEW_EVENT_BASE, VIEW_EVENT_DISPLAY_CFG, &cfg, sizeof(cfg), portMAX_DELAY);
 
+    ESP_ERROR_CHECK(esp_event_handler_instance_register_with(view_event_handle, 
+                                                            VIEW_EVENT_BASE, VIEW_EVENT_DISPLAY_CFG_APPLY, 
+                                                            __view_event_handler, NULL, NULL));
     ESP_ERROR_CHECK(esp_event_handler_instance_register_with(view_event_handle, 
                                                             VIEW_EVENT_BASE, VIEW_EVENT_BRIGHTNESS_UPDATE, 
                                                             __view_event_handler, NULL, NULL));

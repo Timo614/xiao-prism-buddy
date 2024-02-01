@@ -173,11 +173,12 @@ static void __time_cfg_restore(void)
     ret = prism_storage_read(TIME_CFG_STORAGE, (void *)&cfg, &len);
     if( ret == ESP_OK  && len== (sizeof(cfg)) ) {
         ESP_LOGI(TAG, "cfg read successful");
+
         __time_cfg_set(&cfg);
     } else {
-        // err or not find
+        // err or not found
         if( ret == ESP_ERR_NVS_NOT_FOUND) {
-            ESP_LOGI(TAG, "cfg not find");
+            ESP_LOGI(TAG, "cfg not found");
         }else {
             ESP_LOGI(TAG, "cfg read err:%d", ret);
         }
@@ -203,7 +204,8 @@ int prism_time_init(void)
     struct view_data_time_cfg cfg;
     __time_cfg_get(&cfg);
     __time_cfg(&cfg, true);
-    esp_event_post_to(view_event_handle, VIEW_EVENT_BASE, VIEW_EVENT_TIME_CFG_UPDATE, &cfg, sizeof(cfg), portMAX_DELAY);
+    
+    esp_event_post_to(view_event_handle, VIEW_EVENT_BASE, VIEW_EVENT_TIME_CFG_UPDATE, &__g_time_model.cfg, sizeof(__g_time_model.cfg), portMAX_DELAY);
 
     __time_view_update_init();
 
