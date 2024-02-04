@@ -1,3 +1,5 @@
+/// https://open-meteo.com/ Weather data by Open-Meteo.com
+
 #include "prism_weather.h"
 #include "freertos/semphr.h"
 #include "esp_tls.h"

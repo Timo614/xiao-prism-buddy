@@ -31,6 +31,14 @@ This project demonstrates the use of a splitter prism to create a three-dimensio
 - [x] Animated gif browser
 - [x] Cryptocurrency watcher
 
+## Third Party APIs
+
+This application uses several third party APIs that provide free plans, see their sites for their respective license and rate limit information.
+
+- [Weather data by Open-Meteo.com](https://open-meteo.com/)
+- Cryptocurrency data [Powered by CoinGecko](https://www.coingecko.com)
+
+
 ### Dependencies
 
 The following library versions were used for this example:
